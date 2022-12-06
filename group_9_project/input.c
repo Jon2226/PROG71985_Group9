@@ -1,8 +1,7 @@
-// PROG71985 - Fall 2022 - Group Project
-// Group 9: Jonathan Ward, Drasti Patel, Komalpreet Kaur
-// based on examples from Prof. Steve Hendrikse
+﻿// PROG71985 - Fall 2022
+// Jonathan Ward - based on examples from Prof. Steve Hendrikse
 
-// common user input routines
+// implementation of common user input routines
 
 #include "input.h"
 #include <string.h>
@@ -30,6 +29,24 @@ void removeNewLineFromString(char* string)
         if (string[i] == '\n')
             string[i] = '\0';
     }
+}
+
+// useful for sanitizing CSV inputs
+bool removeDisallowedChars(char* string, char* disallowed)
+{
+    bool badInput = false;
+    for (int i = 0; i < strlen(string); i++)
+    {
+        for (int j = 0; j < strlen(disallowed); j++)
+        {
+            if (string[i] == disallowed[j])
+            {
+                string[i] = '_';
+                badInput = true;
+            }
+        }
+    }
+    return badInput;    // might be useful to print error if true
 }
 
 bool stringIsNumeric(char* string)
@@ -65,15 +82,41 @@ bool promptAndGetDoubleInput(char* prompt, double* userInput)
     puts(prompt);
 
     char input[MAXSTRINGTODOUBLE];
-    fgets(input, (int)MAXSTRINGTODOUBLE, stdin);
+    if (fgets(input, (int)MAXSTRINGTODOUBLE, stdin) == NULL)
+        return false;
     removeNewLineFromString(input);
 
     if (!stringIsNumeric(input))
         return false;
     else
     {
-        *userInput = (double)atof(input);
+        *userInput = atof(input);
         return true;
+    }
+}
+
+// Special input function to check for non-numeric menu escape codes.
+// Returns 0 for success, -1, for failure, 1 for finished, 2 for cancel.  
+int promptAndGetDoubleInputWithEscape(char* prompt, double* userInput,
+    char finished, char cancel)
+{
+    puts(prompt);
+
+    char input[MAXSTRINGTODOUBLE];
+    fgets(input, (int)MAXSTRINGTODOUBLE, stdin);
+    removeNewLineFromString(input);
+
+    if (input[0] == finished || tolower(input[0]) == finished)
+        return 1;
+    if (input[0] == cancel || tolower(input[0]) == cancel)
+        return 2;
+
+    if (!stringIsNumeric(input))
+        return -1;
+    else
+    {
+        *userInput = (double)atof(input);
+        return 0;
     }
 }
 
@@ -82,14 +125,15 @@ bool promptAndGetIntegerInput(char* prompt, int* userInput)
     puts(prompt);
 
     char input[MAXSTRINGTOINT];
-    fgets(input, (int)MAXSTRINGTOINT, stdin);
+    if (fgets(input, (int)MAXSTRINGTOINT, stdin) == NULL)
+        return false;
     removeNewLineFromString(input);
 
     if (!stringIsNumeric(input))
         return false;
     else
     {
-        *userInput = (int)atof(input);
+        *userInput = atoi(input);
         return true;
     }
 }
@@ -97,11 +141,23 @@ bool promptAndGetIntegerInput(char* prompt, int* userInput)
 bool promptAndGetStringInput(char* prompt, char* userInput, size_t maxLength)
 {
     puts(prompt);
-    fgets(userInput, (int)maxLength, stdin);
+    if (fgets(userInput, (int)maxLength, stdin) == NULL)
+        return false;
     removeNewLineFromString(userInput);         // optional
 
     if (strlen(userInput) > 0)
         return true;
     else
         return false;
+}
+
+// for collecting single char e.g. for menu inputs, and ignoring everything 
+// that comes afterward (e.g. the dangling newline)
+char returnSingleChar(void)
+{
+    char firstChar = getc(stdin);
+    char garbage = ' ';
+    while (garbage != '\n' && garbage != EOF)
+        garbage = getc(stdin);
+    return firstChar;
 }

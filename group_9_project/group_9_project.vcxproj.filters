@@ -30,7 +30,7 @@
     <ClCompile Include="calendar.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Error.c">
+    <ClCompile Include="error.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -47,7 +47,7 @@
     <ClInclude Include="calendar.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Error.h">
+    <ClInclude Include="error.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

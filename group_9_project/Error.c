@@ -1,19 +1,18 @@
-// PROG71985 - Fall 2022 - Group Project
+﻿// PROG71985 - Fall 2022
 // Jonathan Ward - based on examples from Prof. Steve Hendrikse
 
 // simple error handling and exit() wrappers
 
-#include "Error.h"
+#include "error.h"
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdbool.h>
 
 // maybe a little paranoid not to just use fprintf
 void printError(char* msg)
 {
     fputs("Non-fatal error: ", stderr);
     fputs(msg, stderr);
-    fputs(", continuing\n", stderr);
+    fputs(", continuing\n\n", stderr);
 }
 
 void exitWithError(char* msg)

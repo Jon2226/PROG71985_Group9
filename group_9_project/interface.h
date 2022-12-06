@@ -1,25 +1,34 @@
-// PROG71985 - Fall 2022 - Group Project
+﻿// PROG71985 - Fall 2022 - Group Project
 // Group 9: Jonathan Ward, Drasti Patel, Komalpreet Kaur
 
 #pragma once
 #include "calendar.h"
 
-bool addNewEvent(EVENT*);
-
-bool deleteExistingEvent(EVENT*);
-
-bool modifyEvent(EVENT*);
-
+void printCurrentDate(void);
 void displayMainMenu(void);
+bool runMainMenu(EVENT* e, char* dataFileName);
 
-void displayEvent(EVENT*);
+void userAddEvent(EVENT* e);
+void userDeleteEvent(EVENT* e);
+void userModifyEvent(EVENT* e);
 
-void searchByName(EVENT*);
+void loadFromGivenFile(EVENT* e);
+void saveToGivenFile(EVENT* e);
 
-void displayDay(EVENT*);
+bool runRangeMenu(EVENT* e);
+void displayDay(EVENT* e);
+void displayWeek(EVENT* e);
+void displayMonth(EVENT* e);
+void displayYear(EVENT* e);
+void displayAllEvents(EVENT* e);
 
-void displayWeek(EVENT*);
+void inputDay(TIME* day);
+void inputWeek(TIME* week);
+void inputMonth(TIME* month);
+void inputYear(TIME* year);
 
-void displayMonth(EVENT*);
+bool runSearchMenu(EVENT* e);
+bool searchByType(EVENT* e);
+bool searchByDescription(EVENT* e);
 
-void displayYear(EVENT*);
+bool exitWithoutSave(void);

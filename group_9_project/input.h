@@ -1,8 +1,7 @@
-// PROG71985 - Fall 2022 - Group Project
-// Group 9: Jonathan Ward, Drasti Patel, Komalpreet Kaur
-// based on examples from Prof. Steve Hendrikse
+﻿// PROG71985 - Fall 2022
+// Jonathan Ward - based on examples from Prof. Steve Hendrikse
 
-// declarations for common user input routines
+// interface for common user input routines
 
 #pragma once
 #include <stdbool.h>
@@ -12,10 +11,17 @@ int countOfCharInString(char* string, char c);
 
 void removeNewLineFromString(char* string);
 
+bool removeDisallowedChars(char* string, char* disallowed);
+
 bool stringIsNumeric(char* string);
 
 bool promptAndGetDoubleInput(char* prompt, double* response);
 
+int promptAndGetDoubleInputWithEscape(char* prompt, double* userInput,
+    char finished, char cancel);
+
 bool promptAndGetIntegerInput(char* prompt, int* response);
 
 bool promptAndGetStringInput(char* prompt, char* response, size_t max);
+
+char returnSingleChar(void);
