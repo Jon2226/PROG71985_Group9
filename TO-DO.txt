@@ -1,0 +1,38 @@
+# PROG71985_Group9    TO-DO LIST
+
+Useful links: 
+https://cplusplus.com/reference/ctime/
+
+– LINKED LIST OF EVENTS: see classroom example, and assignments 3 and 4
+
+
+Simple things: 
+– get/set functions for members of EVENT struct (using pointers)
+– get/set functions for members of TIME struct (using pointers)
+    – note: for set functions, check for invalid values and return false if invalid
+– create/destroy/copy functions for TIME struct
+– switch/case  functions:     getMonthName(TIME* t), getWeekdayName(TIME* t)
+    – similar to the switch functions that already exist for other enums
+
+
+Display functions: 
+    – display single event data
+    – display all known events
+– display a given week (with headings for each day “Mon Tues Wed” etc and any events on that day below)
+    – display year (with * next to days for events)
+    – display single month (with * next to days for events)
+Essentially like this: https://media.geeksforgeeks.org/wp-content/uploads/cal3.png
+
+
+    – search for an event by type
+    – search for an event by day        – display single day and any events
+
+
+User input: 
+– input dates/times: if no value is given, assume current
+    – make a new event (incl. repeating events)
+    – delete an existing event
+    – modify an existing event
+
+UNIT TESTS for every complex function
+
