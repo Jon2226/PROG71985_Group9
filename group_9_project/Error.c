@@ -27,6 +27,6 @@ void exitWithError(char* msg)
 void exitSuccessfully(char* msg)
 {
     puts(msg);
-    puts("\n\n");
+    puts("\n");
     exit(EXIT_SUCCESS);
 }

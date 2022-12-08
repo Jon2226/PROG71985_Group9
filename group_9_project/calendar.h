@@ -1,32 +1,31 @@
 ﻿// PROG71985 - Fall 2022 - Group Project
 // Group 9: Jonathan Ward, Drasti Patel, Komalpreet Kaur
 
+// ADTs and functions for handling time/date information
+
 #pragma once
 #define _CRT_SECURE_NO_WARNINGS
 #include <stdbool.h>
-#include <stdio.h>
 #include <time.h>
 
-// for validating times passed as struct tm
+// string size limits
+#define MAX_TIME_LEN        10
+#define MAX_DATE_LEN        30
+#define MAX_TYPE_LEN        20
+#define MAX_REP_LEN         30
+
+// for validating time values passed as 'struct tm'
 #define MAX_SEC             60    // accounting for leap seconds
 #define MAX_MIN             59
 #define MAX_HOUR            23
-
-#define TWENTY_EIGHT		28
-#define TWENTY_NINE			29
-#define THIRTY				30
-#define THIRTY_ONE			31
-
-#define MAX_DAY            365
 #define MAX_MONTH           11
+#define MAX_DAY            365    // for day of year
 
-#define INIT_YEAR         1900
-
-#define MAX_DESC            51
+#define INIT_YEAR         1900    // "year 0" in 'struct tm' is 1900
 
 typedef enum month
 {
-    JAN = 0,    // NB: struct tm in time.h starts months at 0
+    JAN = 0,    // because 'struct tm' starts months at 0
     FEB = 1,
     MAR = 2,
     APR = 3,
@@ -40,10 +39,10 @@ typedef enum month
     DEC = 11,
 } MONTH;
 
-// probably unnecessary since mktime sets weekday automatically
+// possibly unnecessary since mktime() sets weekday automatically
 typedef enum weekday
 {
-    SUN = 0,    // consistent with struct tm in time.h
+    SUN = 0,    // consistent with 'struct tm' in <time.h>
     MON = 1,
     TUE = 2,
     WED = 3,
@@ -54,56 +53,42 @@ typedef enum weekday
 
 typedef enum eventType
 {
-    APPOINTMENT = 1,
-    BIRTHDAY = 2,
-    DEADLINE = 3,
-    TASK = 4,
-    MEETING = 5,
-    RECREATION = 6,
-    CLASS = 7,
-    OTHER = 8,
+    APPOINTMENT     = 1,
+    BIRTHDAY        = 2,
+    DEADLINE        = 3,
+    TASK            = 4,
+    MEETING         = 5,
+    RECREATION      = 6,
+    CLASS           = 7,
+    OTHER           = 8,
 } EVENT_TYPE;
 
-typedef enum repetition
+typedef enum repetition    // interval of event recurrence (or 0 for none)
 {
-    NONE = 0,
-    DAILY = 1,
-    WEEKLY = 2,
-    MONTHLY = 3,
-    MONTHLY_WEEKDAY = 4,    // e.g. every second tuesday of any month
-    YEARLY_MONTHDAY = 5,    // by day of the month, not day of the year
-    YEARLY_WEEKDAY = 6,     // e.g. second monday of every october
+    NONE                = 0,
+    DAILY               = 1,
+    WEEKLY              = 2,
+    MONTHLY             = 3,
+    YEARLY              = 4,    // by day of month (e.g. Feb 2nd every year)
+    MONTHLY_BY_WEEKDAY  = 5,    // e.g. every third tuesday of all months
+    YEARLY_BY_WEEKDAY   = 6,    // e.g. second monday of every october
 } REPETITION;
 
-typedef struct tm TIME;
 
-typedef struct event
-{
-    bool allDay;
-    EVENT_TYPE type;
-    REPETITION repetition;    // need I repeat myself?
-    TIME startTime;
-    char description[MAX_DESC];
-} EVENT;
+typedef struct tm TIME;           // broken-down time format from <time.h>
 
-EVENT createEvent(bool allDay, EVENT_TYPE type, REPETITION repetition, 
-    TIME startTime, char* description);
+TIME createTime(void);
+void disposeTime(TIME* t);
 
-EVENT copyEvent(EVENT* e);
-EVENT copyEventToNewTime(EVENT* e, TIME* t);
-void destroyEvent(EVENT* e);
-
-void printEventToStream(EVENT* e, FILE* stream);
-void printAllEventsToStream(EVENT* e, FILE* stream);
-EVENT readEventFromStream(FILE* stream);
-void readAllEventsFromStream(EVENT* e, FILE* stream);
-
-char* getTypeString(EVENT_TYPE type);
-
+int compareTimes(TIME* lhs, TIME* rhs);
 bool isLeapYear(TIME* t);
-bool isValidDate(TIME* t);
 bool isValidTime(TIME* t);
 int daysPerMonth(TIME* t);
 
-void displayDate(TIME* t);
+char* getEventTypeString(EVENT_TYPE type);
+char* getRepetitionString(REPETITION repetition);
+
 void displayTime(TIME* t);
+void displayDate(TIME* t);
+void displayLongDate(TIME* t);
+void displayCurrentDate(void);

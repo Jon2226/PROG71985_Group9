@@ -1,31 +1,19 @@
 ﻿// PROG71985 - Fall 2022 - Group Project
 // Group 9: Jonathan Ward, Drasti Patel, Komalpreet Kaur
 
+// implementation of user interface functions for calendar application
+
 #include "interface.h"
 #include "file_io.h"
 #include "input.h"
 #include "error.h"
 
-#define DATE_FORMAT "%Y %B %d (%A)"
-#define MAX_DATE_LEN    61
-
-void printCurrentDate(void)
-{
-    char date[MAX_DATE_LEN] = { 0 };
-    time_t now = time(NULL);
-    const struct tm* pTimeNow = localtime(&now);
-
-    if (strftime(date, sizeof(date), DATE_FORMAT, pTimeNow) == 0)
-        printError("error generating date");
-
-    puts(date);
-}
-
 void displayMainMenu(void)
 {
-    printCurrentDate();
-    // box-drawing chars might cause problems on non-unicode terminals
-    // ...and apparently that could still be a problem in 2022...  :(
+    displayCurrentDate();
+    puts("");   // newline
+    // box-drawing chars might cause problems on non-unicode terminals :(
+    // (apparently that can still be a problem in 2022)
     //puts("\n────────────────────────────────────────────────────────────────────────────────");
     puts("Please enter one of the following numbers corresponding to a command.");
     puts("\t1.  Add an event.");
@@ -37,40 +25,40 @@ void displayMainMenu(void)
     puts("\t0.  Save event data and exit the program.\n");
 }
 
-bool runMainMenu(EVENT* e, char* dataFileName)
+bool runMainMenu(LIST* eventList, char* dataFileName)
 {
     char ch = returnSingleChar();
     switch (ch)
     {
     case '1':
-        userAddEvent(e);
+        userAddEvent(eventList);
         break;
 
     case '2':
-        userDeleteEvent(e);
+        userDeleteEvent(eventList);
         break;
 
     case '3':
-        userModifyEvent(e);
+        userModifyEvent(eventList);
         break;
 
     case '4':
-        while (runRangeMenu(e))
+        while (runRangeMenu(eventList))
             continue;
         break;
 
     case '5':
-        while (runSearchMenu(e))
+        while (runSearchMenu(eventList))
             continue;
         break;
 
     case '6':
-        loadFromGivenFile(e);
+        loadFromGivenFile(eventList);
         break;
 
     case '0':
         backupDataFile(dataFileName);
-        if (!saveDataToFile(e, dataFileName))
+        if (!saveDataToFile(eventList, dataFileName))
             if (!exitWithoutSave())
                 return true;
 
@@ -81,52 +69,58 @@ bool runMainMenu(EVENT* e, char* dataFileName)
         puts("Invalid menu entry.  Please try again.");
         break;
     }
-    return true;
+    return true;    // re-run menu
 }
 
-void userAddEvent(EVENT* e)
+void userAddEvent(LIST* eventList)
 {
-    // type menu, repetition menu, allday, start time/date, description
+    // allday, type, repetition, (date) start time, description
 
+    bool allDay = false;
+    EVENT_TYPE type = -1;
+    REPETITION repetition = 0;
+    TIME startTime = { 0 };
+    char description[MAX_DESC] = { 0 };
 
+    // if all day, no startTime, just day
 }
 
-void userDeleteEvent(EVENT* e)
+void userDeleteEvent(LIST* eventList)
 {
 
 
 }
 
-void userModifyEvent(EVENT* e)
+void userModifyEvent(LIST* eventList)
 {
 
 }
 
-void loadFromGivenFile(EVENT* e)
-{
-    char fileName[MAX_FILE_NAME];
-    char* prompt = "Please enter the name of the file you wish to load.";
-
-    if (!promptAndGetStringInput(prompt, fileName, MAX_FILE_NAME))
-        puts("Please try again.");
-
-    if (!loadDataFromFile(e, fileName))
-        puts("File not found.");
-}
-
-void saveToGivenFile(EVENT* e)
+void loadFromGivenFile(LIST* eventList)
 {
     char fileName[MAX_FILE_NAME];
-    char* prompt = "Please enter a name for the save file.";
+    puts("Please enter the name of the file you wish to load.");
 
-    if (!promptAndGetStringInput(prompt, fileName, MAX_FILE_NAME))
+    if (!getStringInput(fileName, MAX_FILE_NAME))
         puts("Please try again.");
 
-    if (!saveDataToFile(e, fileName))
-        puts("Unable to save data.");
+    if (!loadDataFromFile(eventList, fileName))
+        printError("data file absent or unable to load");
 }
 
-bool runRangeMenu(EVENT* e)
+void saveToGivenFile(LIST* eventList)
+{
+    char fileName[MAX_FILE_NAME];
+    puts("Please enter a name for the save file.");
+
+    if (!getStringInput(fileName, MAX_FILE_NAME))
+        puts("Please try again.");
+
+    if (!saveDataToFile(eventList, fileName))
+        printError("unable to open data file for save.");
+}
+
+bool runRangeMenu(LIST* eventList)
 {
     puts("\nPlease enter one of the following numbers.");
     puts("\t1.  Display all events.");
@@ -141,23 +135,23 @@ bool runRangeMenu(EVENT* e)
     switch (ch)
     {
     case '1':
-        displayDay(e);
+        displayDay(eventList);
         break;
 
     case '2':
-        displayWeek(e);
+        displayWeek(eventList);
         break;
 
     case '3':
-        displayMonth(e);
+        displayMonth(eventList);
         break;
 
     case '4':
-        displayYear(e);
+        displayYear(eventList);
         break;
 
     case '5':
-        displayAllEvents(e);
+        displayAllEvents(eventList);
         break;
 
     //case '6':
@@ -172,26 +166,15 @@ bool runRangeMenu(EVENT* e)
         return true;
         break;
     }
-    return false;
+    return true;    // re-run menu
 }
 
-void displayEvent(EVENT* e)
-{
-
-    printf("");
-        
-    if (e->allDay)
-        puts("All day.");
-
-    // allday, type, repetition, (date) start time, description
-}
-
-void displayAllEvents(EVENT* e)
+void displayAllEvents(LIST* eventList)
 {
 
 }
 
-void displayDay(EVENT* e)
+void displayDay(LIST* eventList)
 {
     char day[MAX_DATE_LEN] = { 0 };
     //TIME* d = { 0 };
@@ -205,12 +188,12 @@ void displayDay(EVENT* e)
     // now search events for day and print
 }
 
-void displayWeek(EVENT* e)
+void displayWeek(LIST* eventList)
 {
     // display 7 days vertically... or horizontally
 }
 
-void displayMonth(EVENT* e)
+void displayMonth(LIST* eventList)
 {
     char month[MAX_DATE_LEN] = { 0 };
     int year = 0;
@@ -218,7 +201,7 @@ void displayMonth(EVENT* e)
     puts("\tMon Tue Wed Thu Fri Sat Sun\t");
 }
 
-void displayYear(EVENT* e)
+void displayYear(LIST* eventList)
 {
 
 }
@@ -243,24 +226,27 @@ void inputYear(TIME* year)
 
 }
 
-bool runSearchMenu(EVENT* e)
+bool runSearchMenu(LIST* eventList)
 {
     puts("\nPlease enter a number corresponding to the search parameter you wish to use.");
     puts("\t1.  Event type.");
-    puts("\t2.  Event description.");
+    puts("\t2.  Event repetition.");
+    puts("\t3.  Event description.");
     puts("\t0.  Return to main menu.\n");
 
     char ch = returnSingleChar();
     switch (ch)
     {
     case '1':
-        while (searchByType(e))
-            continue;
+        searchByType(eventList);
         break;
 
     case '2':
-        while (searchByDescription(e))
-            continue;
+        searchByRepetition(eventList);
+        break;
+
+    case '3':
+        searchByDescription(eventList);
         break;
 
     case '0':
@@ -272,38 +258,54 @@ bool runSearchMenu(EVENT* e)
         return true;
         break;
     }
-    return false;
+    return true;    // re-run menu
 }
 
-bool searchByType(EVENT* e)
+void searchByType(LIST* eventList)
 {
     puts("\nPlease enter the number of the event type you are searching for.");
     // lazy way to print a menu for event type enum
-    for (int i = 0; i < OTHER; i++)
+    for (int i = 1; i < OTHER; i++)
     {
-        printf("\t%d.  %s\n", i, getTypeString(i));
+        printf("\t%d.  %s\n", i, getEventTypeString(i));
     }
     puts("\t0.  Return to search menu.\n");
 
-    // search events by type
+    int input = 0;
+    if (!getIntegerInput(&input))
+        puts("Please try again.");
 
 }
 
-bool searchByDescription(EVENT* e)
+void searchByRepetition(LIST* eventList)
+{
+    puts("\nPlease enter the number of the event type you are searching for.");
+    for (int i = 0; i < YEARLY_BY_WEEKDAY; i++)
+    {
+        printf("\t%d.  %s\n", i, getRepetitionString(i));
+    }
+    puts("\t-1.  Return to search menu.\n");
+
+    int input = 0;
+    if (!getIntegerInput(&input))
+        puts("Please try again.");
+
+}
+
+void searchByDescription(LIST* eventList)
 {
     char description[MAX_DESC] = { 0 };
-    char* prompt = "\nPlease enter a word from the description of the event you are searching for.";
-    promptAndGetStringInput(prompt, description, MAX_DESC);
+    puts("\nPlease enter a word from the description of the event you are searching for.");
 
-    // search events by description
+    if (!getStringInput(description, MAX_DESC))
+        puts("Please try again.");
 
 }
 
 bool exitWithoutSave(void)
 {
-    puts("Would you like to exit without saving?  (y/n)");
+    puts("\nWould you like to exit without saving?  (y/n)");
     char ch = returnSingleChar();
-
     if (ch == 'y' || ch == 'Y')
         return true;
     else

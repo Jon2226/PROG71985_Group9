@@ -1,2 +1,3 @@
-﻿  main.c
+﻿  interface.c
+C:\Users\Jon\Documents\Nextcloud\Code\Git\PROG71985_Group9\group_9_project\interface.c(328): warning C4715: 'confirmExit': not all control paths return a value
   group_9_project.vcxproj -> C:\Users\Jon\Documents\Nextcloud\Code\Git\PROG71985_Group9\x64\Debug\group_9_project.exe

@@ -7,21 +7,16 @@
 #include <stdbool.h>
 #include <stdio.h>
 
-int countOfCharInString(char* string, char c);
-
 void removeNewLineFromString(char* string);
-
 bool removeDisallowedChars(char* string, char* disallowed);
+
+int countOfCharInString(char* string, char c);
 
 bool stringIsNumeric(char* string);
 
-bool promptAndGetDoubleInput(char* prompt, double* response);
-
-int promptAndGetDoubleInputWithEscape(char* prompt, double* userInput,
-    char finished, char cancel);
-
-bool promptAndGetIntegerInput(char* prompt, int* response);
-
-bool promptAndGetStringInput(char* prompt, char* response, size_t max);
+bool getStringInput(char* response, size_t max);
+bool getIntegerInput(int* response);
+bool getDoubleInput(double* response);
+int getDoubleInputWithEscape(double* userInput, char finished, char cancel);
 
 char returnSingleChar(void);

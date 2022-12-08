@@ -11,17 +11,6 @@
 #define MAXSTRINGTODOUBLE		20
 #define MAXSTRINGTOINT		    12      // more than enough for unsigned long
 
-int countOfCharInString(char* string, char c)
-{
-    int count = 0;
-    for (int i = 0; i < strlen(string); i++)
-    {
-        if (string[i] == c)
-            count++;
-    }
-    return count;
-}
-
 void removeNewLineFromString(char* string)
 {
     for (int i = 0; i < strlen(string); i++)
@@ -47,6 +36,17 @@ bool removeDisallowedChars(char* string, char* disallowed)
         }
     }
     return badInput;    // might be useful to print error if true
+}
+
+int countOfCharInString(char* string, char c)
+{
+    int count = 0;
+    for (int i = 0; i < strlen(string); i++)
+    {
+        if (string[i] == c)
+            count++;
+    }
+    return count;
 }
 
 bool stringIsNumeric(char* string)
@@ -77,10 +77,36 @@ bool stringIsNumeric(char* string)
         return false;
 }
 
-bool promptAndGetDoubleInput(char* prompt, double* userInput)
+bool getStringInput(char* userInput, size_t maxLength)
 {
-    puts(prompt);
+    if (fgets(userInput, (int)maxLength, stdin) == NULL)
+        return false;
+    removeNewLineFromString(userInput);         // optional
 
+    if (strlen(userInput) > 0)
+        return true;
+    else
+        return false;
+}
+
+bool getIntegerInput(int* userInput)
+{
+    char input[MAXSTRINGTOINT];
+    if (fgets(input, (int)MAXSTRINGTOINT, stdin) == NULL)
+        return false;
+    removeNewLineFromString(input);
+
+    if (!stringIsNumeric(input))
+        return false;
+    else
+    {
+        *userInput = atoi(input);
+        return true;
+    }
+}
+
+bool getDoubleInput(double* userInput)
+{
     char input[MAXSTRINGTODOUBLE];
     if (fgets(input, (int)MAXSTRINGTODOUBLE, stdin) == NULL)
         return false;
@@ -97,11 +123,9 @@ bool promptAndGetDoubleInput(char* prompt, double* userInput)
 
 // Special input function to check for non-numeric menu escape codes.
 // Returns 0 for success, -1, for failure, 1 for finished, 2 for cancel.  
-int promptAndGetDoubleInputWithEscape(char* prompt, double* userInput,
+int getDoubleInputWithEscape(double* userInput,
     char finished, char cancel)
 {
-    puts(prompt);
-
     char input[MAXSTRINGTODOUBLE];
     fgets(input, (int)MAXSTRINGTODOUBLE, stdin);
     removeNewLineFromString(input);
@@ -120,44 +144,15 @@ int promptAndGetDoubleInputWithEscape(char* prompt, double* userInput,
     }
 }
 
-bool promptAndGetIntegerInput(char* prompt, int* userInput)
-{
-    puts(prompt);
-
-    char input[MAXSTRINGTOINT];
-    if (fgets(input, (int)MAXSTRINGTOINT, stdin) == NULL)
-        return false;
-    removeNewLineFromString(input);
-
-    if (!stringIsNumeric(input))
-        return false;
-    else
-    {
-        *userInput = atoi(input);
-        return true;
-    }
-}
-
-bool promptAndGetStringInput(char* prompt, char* userInput, size_t maxLength)
-{
-    puts(prompt);
-    if (fgets(userInput, (int)maxLength, stdin) == NULL)
-        return false;
-    removeNewLineFromString(userInput);         // optional
-
-    if (strlen(userInput) > 0)
-        return true;
-    else
-        return false;
-}
-
 // for collecting single char e.g. for menu inputs, and ignoring everything 
 // that comes afterward (e.g. the dangling newline)
 char returnSingleChar(void)
 {
     char firstChar = getc(stdin);
+
     char garbage = ' ';
     while (garbage != '\n' && garbage != EOF)
         garbage = getc(stdin);
+
     return firstChar;
 }

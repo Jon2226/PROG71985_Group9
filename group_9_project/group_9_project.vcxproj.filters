@@ -33,6 +33,15 @@
     <ClCompile Include="error.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="sl_list.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="sl_node.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="event.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="file_io.h">
@@ -48,6 +57,15 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="error.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="sl_list.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="sl_node.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="event.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

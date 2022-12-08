@@ -129,17 +129,23 @@
   <ItemGroup>
     <ClCompile Include="calendar.c" />
     <ClCompile Include="error.c" />
+    <ClCompile Include="event.c" />
     <ClCompile Include="file_io.c" />
     <ClCompile Include="input.c" />
     <ClCompile Include="interface.c" />
     <ClCompile Include="main.c" />
+    <ClCompile Include="sl_list.c" />
+    <ClCompile Include="sl_node.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="calendar.h" />
     <ClInclude Include="error.h" />
+    <ClInclude Include="event.h" />
     <ClInclude Include="file_io.h" />
     <ClInclude Include="input.h" />
     <ClInclude Include="interface.h" />
+    <ClInclude Include="sl_list.h" />
+    <ClInclude Include="sl_node.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -2,92 +2,44 @@
 // Group 9: Jonathan Ward, Drasti Patel, Komalpreet Kaur
 
 #include "calendar.h"
+#include "error.h"
+#include <stdio.h>
 #include <string.h>
 
-EVENT createEvent(bool allDay, EVENT_TYPE type, REPETITION repetition, 
-    TIME startTime, char* description)
+// implementation of functions for handling time/date information
+
+TIME createTime(void)   // probably won't need this for now
 {
-    EVENT e = { 0 };
-    e.allDay = allDay;
-    e.type = type;
-    e.repetition = repetition;
-    e.startTime = startTime;
-
-    strncpy(e.description, description, MAX_DESC);
-    e.description[MAX_DESC - 1] = '\0';
-
-    return e;
+    TIME t = { 0 };
+    return t;
 }
 
-EVENT copyEvent(EVENT* e)
+void disposeTime(TIME* t)
 {
-    return createEvent(e->allDay, e->type, e->repetition, e->startTime, 
-        e->description);
+    // nothing for now
 }
 
-EVENT copyEventToNewTime(EVENT* e, TIME* t)
+int compareTimes(TIME* lhs, TIME* rhs)
 {
-    return createEvent(e->allDay, e->type, e->repetition, *t,
-        e->description);
-}
+    time_t left = mktime(lhs);
+    time_t right = mktime(rhs);
+    
+    return (left > right) - (left < right);
 
-void destroyEvent(EVENT* e)
-{
-
-}
-
-void printEventToStream(EVENT* e, FILE* stream)
-{
-
-}
-
-void printAllEventsToStream(EVENT* e, FILE* stream)
-{
-
-}
-
-EVENT readEventFromStream(FILE* stream)
-{
-    EVENT e = { 0 };
-
-
-    return e;
-}
-
-void readAllEventsFromStream(EVENT* e, FILE* stream)
-{
-
-}
-
-char* getTypeString(EVENT_TYPE type)
-{
-    switch (type)
-    {
-    case APPOINTMENT: 
-        return "appointment";
-    case BIRTHDAY: 
-        return "birthday";
-    case DEADLINE: 
-        return "deadline";
-    case TASK: 
-        return "task";
-    case MEETING: 
-        return "meeting";
-    case RECREATION: 
-        return "recreation";
-    case CLASS: 
-        return "class";
-    case OTHER: 
-        return "other";
-    default: 
-        return NULL;
-    }
+    // equivalent to this: 
+    //if (left < right)
+    //    return -1;
+    //else if (left == right)
+    //    return 0;
+    //else if (left > right)
+    //    return 1;
 }
 
 bool isLeapYear(TIME* t)
 {
     int year = t->tm_year + INIT_YEAR;
-    // every four years (but not on a new century, except every 4 centuries)
+    // leap years normally occur every four years (but not on a new century,  
+    // except every 4 centuries there is a leap year)
     if (year % 4 == 0 && year % 100 != 0 || year % 400 == 0)
         return true;
     else
@@ -111,9 +63,6 @@ bool isValidTime(TIME* t)
     if (t->tm_mon < 0 || t->tm_mon > MAX_MONTH)
         return false;
 
-    if (t->tm_year < 0)
-        return false;
-
     if (t->tm_wday > SAT || t->tm_wday < SUN)
         return false;
 
@@ -135,31 +84,105 @@ int daysPerMonth(TIME* t)
     case AUG: 
     case OCT: 
     case DEC: 
-        return THIRTY_ONE;
-
+        return 31;          // 31 days for most months
+        
     case APR: 
     case JUN: 
     case SEP: 
     case NOV: 
-        return THIRTY;
+        return 30;
 
     case FEB: 
         if (isLeapYear(t))
-            return TWENTY_NINE;
+            return 29;      // 29 days for February in a leap year
         else
-            return TWENTY_EIGHT;
+            return 28;      // otherwise just 28
 
     default: 
         return 0;
     }
 }
 
-void displayDate(TIME* t)
+char* getEventTypeString(EVENT_TYPE type)
 {
-    
+    switch (type)
+    {
+    case APPOINTMENT:
+        return "appointment";
+    case BIRTHDAY:
+        return "birthday";
+    case DEADLINE:
+        return "deadline";
+    case TASK:
+        return "task";
+    case MEETING:
+        return "meeting";
+    case RECREATION:
+        return "recreation";
+    case CLASS:
+        return "class";
+    case OTHER:
+        return "other";
+    default:
+        return NULL;
+    }
+}
+
+char* getRepetitionString(REPETITION repetition)
+{
+    switch (repetition)
+    {
+    case NONE: 
+        return "none";
+    case DAILY: 
+        return "daily";
+    case WEEKLY: 
+        return "weekly";
+    case MONTHLY: 
+        return "monthly";
+    case YEARLY: 
+        return "yearly";
+    case MONTHLY_BY_WEEKDAY: 
+        return "monthly (by day of week)";
+    case YEARLY_BY_WEEKDAY: 
+        return "yearly (by day of week)";
+    default:
+        return NULL;
+    }
 }
 
 void displayTime(TIME* t)
 {
+    char time[MAX_DATE_LEN] = { 0 };
+    if (strftime(time, sizeof(time), "%H:%M", t) == 0)
+        printError("error generating date");
+    else
+        fputs(time, stdout);
+}
 
+void displayDate(TIME* t)
+{
+    char date[MAX_DATE_LEN] = { 0 };
+    if (strftime(date, sizeof(date), "%Y %b %d", t) == 0)
+        printError("error generating date");
+    else
+        fputs(date, stdout);
+}
+
+void displayLongDate(TIME* t)
+{
+    char date[MAX_DATE_LEN] = { 0 };
+    if (strftime(date, sizeof(date), "%Y %B %d (%A)", t) == 0)
+        printError("error generating date");
+    else 
+        fputs(date, stdout);
+}
+
+void displayCurrentDate(void)
+{
+    char date[MAX_DATE_LEN] = { 0 };
+    time_t now = time(NULL);
+    TIME* pTimeNow = localtime(&now);
+
+    displayLongDate(pTimeNow);
 }

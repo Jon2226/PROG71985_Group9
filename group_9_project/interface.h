@@ -1,34 +1,37 @@
 ﻿// PROG71985 - Fall 2022 - Group Project
 // Group 9: Jonathan Ward, Drasti Patel, Komalpreet Kaur
 
+// declarations of user interface functions for calendar application
+
 #pragma once
-#include "calendar.h"
+#include "sl_list.h"
 
-void printCurrentDate(void);
 void displayMainMenu(void);
-bool runMainMenu(EVENT* e, char* dataFileName);
+bool runMainMenu(LIST* eventList, char* dataFileName);
 
-void userAddEvent(EVENT* e);
-void userDeleteEvent(EVENT* e);
-void userModifyEvent(EVENT* e);
+void userAddEvent(LIST* eventList);
+void userDeleteEvent(LIST* eventList);
+void userModifyEvent(LIST* eventList);
 
-void loadFromGivenFile(EVENT* e);
-void saveToGivenFile(EVENT* e);
+void loadFromGivenFile(LIST* eventList);
+void saveToGivenFile(LIST* eventList);
 
-bool runRangeMenu(EVENT* e);
-void displayDay(EVENT* e);
-void displayWeek(EVENT* e);
-void displayMonth(EVENT* e);
-void displayYear(EVENT* e);
-void displayAllEvents(EVENT* e);
+bool runRangeMenu(LIST* eventList);
+
+void displayDay(LIST* eventList);
+void displayWeek(LIST* eventList);
+void displayMonth(LIST* eventList);
+void displayYear(LIST* eventList);
+void displayAllEvents(LIST* eventList);
 
 void inputDay(TIME* day);
 void inputWeek(TIME* week);
 void inputMonth(TIME* month);
 void inputYear(TIME* year);
 
-bool runSearchMenu(EVENT* e);
-bool searchByType(EVENT* e);
-bool searchByDescription(EVENT* e);
+bool runSearchMenu(LIST* eventList);
+void searchByType(LIST* eventList);
+void searchByDescription(LIST* eventList);
+void searchByRepetition(LIST* eventList);
 
 bool exitWithoutSave(void);
