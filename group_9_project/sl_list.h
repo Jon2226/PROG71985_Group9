@@ -15,10 +15,12 @@ typedef struct List
 LIST createList(void);
 void disposeList(LIST* list);
 
-bool addEventToList(LIST* list, EVENT* event);
-bool removeEventFromList(LIST* list, EVENT* eventToDelete);
+bool addEventToList(LIST* list, EVENT event);
+bool removeEventFromList(LIST* list, EVENT* eventToDelete,
+        bool (*compareEvents)(EVENT* left, EVENT* right));
 
 int getCurrentCount(LIST* list);
 void displayList(LIST* list);
 
-EVENT* searchListForEvent(LIST* list, EVENT* event);
+EVENT* searchListForEvent(LIST* list, EVENT* event, 
+        bool (*compareEvents)(EVENT* left, EVENT* right));

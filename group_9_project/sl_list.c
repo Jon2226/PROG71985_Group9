@@ -25,7 +25,7 @@ void disposeList(LIST* list)
     }
 }
 
-bool addEventToList(LIST* list, EVENT* event)
+bool addEventToList(LIST* list, EVENT event)
 {
     NODE* newNode = createNode(event);
 
@@ -48,12 +48,17 @@ bool addEventToList(LIST* list, EVENT* event)
     return true;
 }
 
-bool removeEventFromList(LIST* list, EVENT* eventToDelete)
+// This should only be used with compareFullEvent(), compareEventTimeAndDate(),
+// or compareEventDate() (for all-day events).  It will simply delete the first
+// event it finds that matches whatever criterion is given, so unique critera 
+// are best to avoid unexpected behaviour.  
+bool removeEventFromList(LIST* list, EVENT* eventToDelete,
+        bool (*compareEvents)(EVENT* left, EVENT* right))
 {
     bool found = false;
     NODE* current = list->head;
 
-    if (compareEvent(&current->data, eventToDelete))
+    if (compareEvents(&current->data, eventToDelete))
     {
         if (getNextNode(current) == NULL)
             list->head = NULL;
@@ -66,7 +71,7 @@ bool removeEventFromList(LIST* list, EVENT* eventToDelete)
     NODE* prev = NULL;    // needed to re-link after deleting
     while (current != NULL)
     {
-        if (compareEvent(&current->data, eventToDelete))
+        if (compareEvents(&current->data, eventToDelete))
             break;
 
         prev = current;
@@ -111,7 +116,8 @@ void displayList(LIST* list)
 }
 
 
-EVENT* searchListForEvent(LIST* list, EVENT* event)
+EVENT* searchListForEvent(LIST* list, EVENT* event,
+        bool (*compareEvents)(EVENT* left, EVENT* right))
 {
     EVENT* notFoundEvent = NULL;
 
@@ -121,7 +127,7 @@ EVENT* searchListForEvent(LIST* list, EVENT* event)
     NODE* current = list->head;
     do
     {
-        if (compareEvent(event, getEventFromNode(current)))
+        if (compareEvents(event, getEventFromNode(current)))
             return getEventFromNode(current);
 
         current = getNextNode(current);

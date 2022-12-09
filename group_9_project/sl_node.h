@@ -13,7 +13,7 @@ typedef struct node
     struct node* next;
 } NODE;
 
-NODE* createNode(EVENT* event);
+NODE* createNode(EVENT event);
 void disposeNode(NODE* node);
 
 NODE* getNextNode(NODE* node);

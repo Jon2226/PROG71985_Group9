@@ -8,10 +8,45 @@
 
 // implementation of functions for handling time/date information
 
-TIME createTime(void)   // probably won't need this for now
+TIME createTime(int sec, int min, int hour, int mday, int mon, int year, 
+    int wday, int yday, int isdst)
 {
     TIME t = { 0 };
+    t.tm_sec = sec;
+    t.tm_min = min;
+    t.tm_hour = hour;
+    t.tm_mday = mday;
+    t.tm_mon = mon;
+    t.tm_year = year;
+    t.tm_wday = wday;
+    t.tm_yday = yday;
+    t.tm_isdst = isdst;
+
+    if (!isValidTime(&t))
+        printError("Possible error in assigned time data.");
+
     return t;
+}
+
+// preferable to avoid falling outside valid ranges - as opposed to = { 0 }
+TIME createZeroedTime(void)
+{
+    int sec = 0;
+    int min = 0;
+    int hour = 0;
+    int mday = 1;    // staying within valid range
+    int mon = JAN;
+    int year = 0;
+    int wday = SUN;
+    int yday = 0;
+    int isdst = -1;    // meaning information unavailable
+    return createTime(sec, min, hour, mday, mon, year, wday, yday, isdst);
+}
+
+TIME copyTime(TIME t)
+{
+    return createTime(t.tm_sec, t.tm_min, t.tm_hour, t.tm_mday, t.tm_mon,
+        t.tm_year, t.tm_wday, t.tm_yday, t.tm_isdst);
 }
 
 void disposeTime(TIME* t)
@@ -46,30 +81,48 @@ bool isLeapYear(TIME* t)
         return false;
 }
 
+bool isValidDate(TIME* t)
+{
+    if ((t->tm_mday < 1 || t->tm_mday > daysPerMonth(t))
+     || (t->tm_mon < 0 || t->tm_mon > MAX_MONTH)
+     || (t->tm_wday > SAT || t->tm_wday < SUN)
+     || (t->tm_yday < 0 || t->tm_yday > MAX_DAY))
+        return false;
+
+    return true;
+}
+
 bool isValidTime(TIME* t)
 {
+    if ((t->tm_sec < 0 || t->tm_sec > MAX_SEC)
+     || (t->tm_min < 0 || t->tm_min > MAX_MIN)
+     || (t->tm_hour < 0 || t->tm_hour > MAX_HOUR))
+        return false;
+
+    return true;
+}
+
+bool isValidDateAndTime(TIME* t)
+{
+    return isValidDate(t) && isValidTime(t);
+    /* better to split these functions
     if (t->tm_sec < 0 || t->tm_sec > MAX_SEC)
         return false;
-
     if (t->tm_min < 0 || t->tm_min > MAX_MIN)
         return false;
-
     if (t->tm_hour < 0 || t->tm_hour > MAX_HOUR)
         return false;
-
     if (t->tm_mday < 1 || t->tm_mday > daysPerMonth(t))
         return false;
-
     if (t->tm_mon < 0 || t->tm_mon > MAX_MONTH)
         return false;
-
     if (t->tm_wday > SAT || t->tm_wday < SUN)
         return false;
-
     if (t->tm_yday < 0 || t->tm_yday > MAX_DAY)
         return false;
 
     return true;
+     */
 }
 
 int daysPerMonth(TIME* t)
@@ -128,9 +181,9 @@ char* getEventTypeString(EVENT_TYPE type)
     }
 }
 
-char* getRepetitionString(REPETITION repetition)
+char* getRecurrenceString(RECURRENCE recurrence)
 {
-    switch (repetition)
+    switch (recurrence)
     {
     case NONE: 
         return "none";

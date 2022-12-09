@@ -8,7 +8,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-NODE* createNode(EVENT* event)
+NODE* createNode(EVENT event)
 {
     NODE* newNode = (NODE*)malloc(sizeof(NODE));
     if (!newNode)

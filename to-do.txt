@@ -1,0 +1,21 @@
+To-do
+	-- display events between two arbitrary dates
+	-- add escape characters to for user to back out of ALL input menus
+	-- add event end time, and/or duration
+	-- check for schedule conflicts when adding an event, and ask user to confirm or change the time
+	-- test/refactor for DST and different timezones compatability
+
+	-- revise search algorithm to continue to the end of the list every time and collect all results at once (by storing them in a second list): this will be much more efficient than re-searching the entire list until we reach the end
+
+	-- fuzzy search
+		-- case-insensitive
+		-- write a containsWord() function using strtok to search for event with just one word of the description
+		-- more complex algorithms?
+
+	-- make an enumerated array of function pointers for different search methods in the search/range menu switch statements... partly to make those functions leaner and more readable, but mostly because function pointers are cool
+
+	-- allow user to define custom event type names
+	-- look at iCal format and consider feasability of import/export
+
+-- learn ncurses to make the I/O way cooler
+-- use a GUI library to... just kidding, CLI > GUI

@@ -17,21 +17,21 @@ void loadFromGivenFile(LIST* eventList);
 void saveToGivenFile(LIST* eventList);
 
 bool runRangeMenu(LIST* eventList);
+bool runSearchMenu(LIST* eventList);
 
-void displayDay(LIST* eventList);
 void displayWeek(LIST* eventList);
 void displayMonth(LIST* eventList);
 void displayYear(LIST* eventList);
 void displayAllEvents(LIST* eventList);
 
-void inputDay(TIME* day);
+EVENT_TYPE inputAndReturnEventType(void);
+RECURRENCE inputAndReturnRecurrence(void);
+
+void inputDateAndTime(TIME* time);
+void inputDate(TIME* date);
 void inputWeek(TIME* week);
 void inputMonth(TIME* month);
 void inputYear(TIME* year);
 
-bool runSearchMenu(LIST* eventList);
-void searchByType(LIST* eventList);
-void searchByDescription(LIST* eventList);
-void searchByRepetition(LIST* eventList);
-
 bool exitWithoutSave(void);
+void horizontalLine(void);

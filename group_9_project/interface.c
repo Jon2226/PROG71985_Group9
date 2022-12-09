@@ -7,26 +7,29 @@
 #include "file_io.h"
 #include "input.h"
 #include "error.h"
+#include <string.h>
 
 void displayMainMenu(void)
 {
+    horizontalLine();
     displayCurrentDate();
     puts("");   // newline
-    // box-drawing chars might cause problems on non-unicode terminals :(
-    // (apparently that can still be a problem in 2022)
-    //puts("\n────────────────────────────────────────────────────────────────────────────────");
+    horizontalLine();
     puts("Please enter one of the following numbers corresponding to a command.");
     puts("\t1.  Add an event.");
     puts("\t2.  Delete an event.");
     puts("\t3.  Modify an event.");
-    puts("\t4.  Display a given range of events.");
+    puts("\t4.  Display events for a given range of time.");
     puts("\t5.  Search for an event.");
     puts("\t6.  Load event data from a given file.");
+    puts("\t7.  Save event data to a given file.");
+    puts("\t8.  Remove auto-loaded event data to start fresh.");
     puts("\t0.  Save event data and exit the program.\n");
 }
 
 bool runMainMenu(LIST* eventList, char* dataFileName)
 {
+    static bool saved = true;
     char ch = returnSingleChar();
     switch (ch)
     {
@@ -56,14 +59,21 @@ bool runMainMenu(LIST* eventList, char* dataFileName)
         loadFromGivenFile(eventList);
         break;
 
+    case '7':
+        saveToGivenFile(eventList);
+        break;
+
+    case '8':
+        *eventList = createList();
+        break;
+
     case '0':
-        backupDataFile(dataFileName);
         if (!saveDataToFile(eventList, dataFileName))
             if (!exitWithoutSave())
                 return true;
 
-        return false;
-        break;          // defensive coding
+        return false;    // end the program
+        break;           // defensive coding
 
     default:
         puts("Invalid menu entry.  Please try again.");
@@ -74,15 +84,17 @@ bool runMainMenu(LIST* eventList, char* dataFileName)
 
 void userAddEvent(LIST* eventList)
 {
-    // allday, type, repetition, (date) start time, description
-
     bool allDay = false;
-    EVENT_TYPE type = -1;
-    REPETITION repetition = 0;
-    TIME startTime = { 0 };
     char description[MAX_DESC] = { 0 };
+    TIME startTime = { 0 };
 
-    // if all day, no startTime, just day
+    puts("Please enter a number for the type of event to be scheduled.");
+    EVENT_TYPE type = inputAndReturnEventType();
+    puts("Please enter the date of the event to be scheduled (YYYY/MM/DD)");
+    
+    // if all day, skip inputing time
+    puts("Please enter a number for the recurrence of the event.");
+    RECURRENCE recurrence = inputAndReturnRecurrence();
 }
 
 void userDeleteEvent(LIST* eventList)
@@ -101,7 +113,7 @@ void loadFromGivenFile(LIST* eventList)
     char fileName[MAX_FILE_NAME];
     puts("Please enter the name of the file you wish to load.");
 
-    if (!getStringInput(fileName, MAX_FILE_NAME))
+    while (!getStringInput(fileName, MAX_FILE_NAME))
         puts("Please try again.");
 
     if (!loadDataFromFile(eventList, fileName))
@@ -113,21 +125,24 @@ void saveToGivenFile(LIST* eventList)
     char fileName[MAX_FILE_NAME];
     puts("Please enter a name for the save file.");
 
-    if (!getStringInput(fileName, MAX_FILE_NAME))
+    while (!getStringInput(fileName, MAX_FILE_NAME))
         puts("Please try again.");
 
     if (!saveDataToFile(eventList, fileName))
         printError("unable to open data file for save.");
+    else
+        puts("Event data saved.");
 }
 
 bool runRangeMenu(LIST* eventList)
 {
+    horizontalLine();
     puts("\nPlease enter one of the following numbers.");
-    puts("\t1.  Display all events.");
-    puts("\t2.  Display events for a given day.");
-    puts("\t3.  Display events for a given week.");
-    puts("\t4.  Display events for a given month.");
-    puts("\t5.  Display events for a given year.");
+    puts("\t1.  Display events for a given day.");
+    puts("\t2.  Display events for a given week.");
+    puts("\t3.  Display events for a given month.");
+    puts("\t4.  Display events for a given year.");
+    puts("\t5.  Display all events.");
     //puts("6.\tDisplay events between two given days.");
     puts("\t0.  Return to main menu.\n");
 
@@ -135,7 +150,6 @@ bool runRangeMenu(LIST* eventList)
     switch (ch)
     {
     case '1':
-        displayDay(eventList);
         break;
 
     case '2':
@@ -169,28 +183,9 @@ bool runRangeMenu(LIST* eventList)
     return true;    // re-run menu
 }
 
-void displayAllEvents(LIST* eventList)
-{
-
-}
-
-void displayDay(LIST* eventList)
-{
-    char day[MAX_DATE_LEN] = { 0 };
-    //TIME* d = { 0 };
-    //inputDay(d);          // get day from user
-
-    //if (strftime(day, sizeof(day), DATE_FORMAT, d) == 0)
-    //    printError("error generating date");
-
-    puts(day);
-
-    // now search events for day and print
-}
-
 void displayWeek(LIST* eventList)
 {
-    // display 7 days vertically... or horizontally
+    
 }
 
 void displayMonth(LIST* eventList)
@@ -206,47 +201,85 @@ void displayYear(LIST* eventList)
 
 }
 
-void inputDay(TIME* day)
-{
-
-}
-
-void inputWeek(TIME* week)
-{
-
-}
-
-void inputMonth(TIME* month)
-{
-
-}
-
-void inputYear(TIME* year)
+void displayAllEvents(LIST* eventList)
 {
 
 }
 
 bool runSearchMenu(LIST* eventList)
 {
+    horizontalLine();
     puts("\nPlease enter a number corresponding to the search parameter you wish to use.");
-    puts("\t1.  Event type.");
-    puts("\t2.  Event repetition.");
-    puts("\t3.  Event description.");
+    puts("\t1.  Event description.");
+    puts("\t2.  Event type.");
+    puts("\t3.  Event recurrence.");
+    puts("\t4.  Event date.");
+    puts("\t5.  Event date and time.");
+    //puts("\t6.  Find every all-day event.");    // probably not that useful
     puts("\t0.  Return to main menu.\n");
 
+    EVENT* result = NULL;
+    EVENT shellEvent = createZeroedEvent();
+    char description[MAX_DESC] = { 0 };
+
     char ch = returnSingleChar();
+    puts("");    // newline
     switch (ch)
     {
     case '1':
-        searchByType(eventList);
+        puts("Please enter the description of the event you are searching for.");
+        while (!getStringInput(description, MAX_DESC))
+            puts("Please try again.");
+
+        strncpy(shellEvent.description, description, MAX_DESC);
+        shellEvent.description[MAX_DESC - 1] = '\0';
+
+        // keep searching until the end of the list, and display each result
+        while (result = searchListForEvent(eventList, &shellEvent,
+            compareEventDescription) != NULL)
+            displayEvent(result);
         break;
 
     case '2':
-        searchByRepetition(eventList);
+        puts("Please enter the number of the event type you are searching for.");
+        EVENT_TYPE type = inputAndReturnEventType();
+        shellEvent.type = type;
+
+        while (result = searchListForEvent(eventList, &shellEvent,
+            compareEventType) != NULL)
+            displayEvent(result);
         break;
 
     case '3':
-        searchByDescription(eventList);
+        puts("Please enter the number of the recurrence pattern you are searching for.");
+        EVENT_TYPE recurrence = inputAndReturnRecurrence();
+        shellEvent.recurrence = recurrence;
+
+        while (result = searchListForEvent(eventList, &shellEvent, 
+            compareEventRecurrence) != NULL)
+            displayEvent(result);
+        break;
+
+    case '4':
+        puts("Please enter the date you wish to display.");
+        TIME eventDate = createZeroedTime();
+        inputDate(&eventDate);
+        shellEvent.startTime = copyTime(eventDate);
+        
+        while (result = searchListForEvent(eventList, &shellEvent, 
+            compareEventDate) != NULL)
+            displayEvent(result);
+        break;
+
+    case '5':
+        puts("Please enter the date and time you wish to display.");
+        TIME eventTime = createZeroedTime();
+        inputDateAndTime(&eventTime);
+        shellEvent.startTime = copyTime(eventTime);
+
+        while (result = searchListForEvent(eventList, &shellEvent,
+            compareEventDateAndTime) != NULL)
+            displayEvent(result);
         break;
 
     case '0':
@@ -261,44 +294,57 @@ bool runSearchMenu(LIST* eventList)
     return true;    // re-run menu
 }
 
-void searchByType(LIST* eventList)
+EVENT_TYPE inputAndReturnEventType(void)
 {
-    puts("\nPlease enter the number of the event type you are searching for.");
     // lazy way to print a menu for event type enum
-    for (int i = 1; i < OTHER; i++)
-    {
+    for (int i = 1; i <= OTHER; i++)
         printf("\t%d.  %s\n", i, getEventTypeString(i));
-    }
-    puts("\t0.  Return to search menu.\n");
 
     int input = 0;
-    if (!getIntegerInput(&input))
+    while (!getIntegerInput(&input) || input < 1 || input > OTHER)
         puts("Please try again.");
+
+    return input;
+}
+
+RECURRENCE inputAndReturnRecurrence(void)
+{
+    // offset by 1 because recurrence enum starts at 0 and menu starts at 1
+    for (int i = 0; i <= YEARLY_BY_WEEKDAY; i++)
+        printf("\t%d.  %s\n", i + 1, getRecurrenceString(i));
+
+    int input = 0;
+    while (!getIntegerInput(&input) || input < 1 || input > YEARLY_BY_WEEKDAY)
+        puts("Please try again.");
+    
+    return input - 1;
+}
+
+void inputDateAndTime(TIME* time)
+{
 
 }
 
-void searchByRepetition(LIST* eventList)
+void inputDate(TIME* date)
 {
-    puts("\nPlease enter the number of the event type you are searching for.");
-    for (int i = 0; i < YEARLY_BY_WEEKDAY; i++)
-    {
-        printf("\t%d.  %s\n", i, getRepetitionString(i));
-    }
-    puts("\t-1.  Return to search menu.\n");
+    // or input 0 for current date/time
+    char day[MAX_DATE_LEN] = { 0 };
 
-    int input = 0;
-    if (!getIntegerInput(&input))
-        puts("Please try again.");
+    puts("Please input a date (YYYY/MM/DD), or enter 0 for current date.");
+}
+
+void inputWeek(TIME* week)
+{
+    // hmmm
+}
+
+void inputMonth(TIME* month)
+{
 
 }
 
-void searchByDescription(LIST* eventList)
+void inputYear(TIME* year)
 {
-    char description[MAX_DESC] = { 0 };
-    puts("\nPlease enter a word from the description of the event you are searching for.");
-
-    if (!getStringInput(description, MAX_DESC))
-        puts("Please try again.");
 
 }
 
@@ -310,4 +356,11 @@ bool exitWithoutSave(void)
         return true;
     else
         return false;
+}
+
+void horizontalLine(void)
+{
+    puts("________________________________________________________________________________");
+    // box-drawing chars don't look very good on non-unicode terminals :(
+    //puts("\n────────────────────────────────────────────────────────────────────────────────");
 }

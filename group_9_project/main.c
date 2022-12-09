@@ -12,18 +12,16 @@
 
 #define DATA_FILE "event_data.txt"
 
-
 int main(void)
 {
     LIST eventList = createList();
-    confirmExit(0);
+
     if (loadDataFromFile(&eventList, DATA_FILE))
-        puts("Event data loaded from save file.");
+        puts("Event data loaded from previous save file.");
 
-    //do
+    do
         displayMainMenu();
-    //while (runMainMenu());
-
+    while (runMainMenu(&eventList, DATA_FILE));
 
     return 0;
 }
