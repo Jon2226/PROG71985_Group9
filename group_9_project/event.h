@@ -1,15 +1,20 @@
 // PROG71985 - Fall 2022 - Group Project
 // Group 9: Jonathan Ward, Drasti Patel, Komalpreet Kaur
+// Jonathan Ward
 
 // definition of event ADT and functions to handle it
 
 #pragma once
 #include "calendar.h"
 
-#define MAX_DESC            51
+#define MAX_DESC                51
+
+//// unique identifier for events (should be replaced with non-global)
+//int eventIndex = 0;
 
 typedef struct Event
 {
+    int index;    // unique identifier
     bool allDay;
     EVENT_TYPE type;
     RECURRENCE recurrence;
@@ -23,6 +28,7 @@ EVENT createZeroedEvent(void);
 void destroyEvent(EVENT* e);
 EVENT copyEvent(EVENT e);
 EVENT copyEventToDifferentTime(EVENT e, TIME t);
+void setEventDescription(EVENT* e, char* description);
 void addTimeToEventDate(EVENT* e, TIME* t);
 TIME remainingTime(EVENT* e);
 void displayRemainingTime(EVENT* e);
@@ -30,6 +36,7 @@ void displayEvent(EVENT* e);
 
 // these will be called by function pointer parameters to search/remove
 bool compareFullEvent(EVENT* left, EVENT* right);
+bool compareEventIndex(EVENT* left, EVENT* right);
 bool compareEventAllDay(EVENT* left, EVENT* right);
 bool compareEventType(EVENT* left, EVENT* right);
 bool compareEventRecurrence(EVENT* left, EVENT* right);

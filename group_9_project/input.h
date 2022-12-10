@@ -1,4 +1,5 @@
-﻿// PROG71985 - Fall 2022
+﻿// PROG71985 - Fall 2022 - Group Project
+// Group 9: Jonathan Ward, Drasti Patel, Komalpreet Kaur
 // Jonathan Ward - based on examples from Prof. Steve Hendrikse
 
 // interface for common user input routines

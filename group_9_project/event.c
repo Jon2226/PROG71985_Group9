@@ -1,5 +1,6 @@
 // PROG71985 - Fall 2022 - Group Project
 // Group 9: Jonathan Ward, Drasti Patel, Komalpreet Kaur
+// Jonathan Ward
 
 // implementation of functions to handle event ADT
 
@@ -50,6 +51,12 @@ EVENT copyEventToDifferentTime(EVENT e, TIME t)
 {
     return createEvent(e.allDay, e.type, e.recurrence, e.description,
         e.startTime);
+}
+
+void setEventDescription(EVENT* e, char* description)
+{
+    strncpy(e->description, description, MAX_DESC);
+    e->description[MAX_DESC - 1] = '\0';
 }
 
 void addTimeToEventDate(EVENT* e, TIME* t)
@@ -115,6 +122,8 @@ void displayRemainingTime(EVENT* e)
 void displayEvent(EVENT* e)
 {
     // allday, type, recurrence, (date) start time, description
+
+    printf("Event index: %d\n", e->index);
     char* type = getEventTypeString(e->type);
     type[0] = toupper(type[0]);
 
@@ -123,7 +132,7 @@ void displayEvent(EVENT* e)
     displayLongDate(&e->startTime);
     if (e->allDay)
     {
-        puts(", lasting all day.");
+        fputs(", lasting all day.\n", stdout);
     }
     else
     {
@@ -149,6 +158,14 @@ bool compareFullEvent(EVENT* left, EVENT* right)    // check if identical
         && left->recurrence == right->recurrence
         && strcmp(left->description, right->description) == 0
         && mktime(&left->startTime) == mktime(&right->startTime))
+        return true;
+    else
+        return false;
+}
+
+bool compareEventIndex(EVENT* left, EVENT* right)    // should be unique
+{
+    if (left->index == right->index)
         return true;
     else
         return false;

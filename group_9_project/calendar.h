@@ -1,5 +1,6 @@
 ﻿// PROG71985 - Fall 2022 - Group Project
 // Group 9: Jonathan Ward, Drasti Patel, Komalpreet Kaur
+// Jonathan Ward
 
 // ADTs and functions for handling time/date information
 

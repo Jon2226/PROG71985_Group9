@@ -27,6 +27,8 @@ void disposeList(LIST* list)
 
 bool addEventToList(LIST* list, EVENT eventToAdd)
 {
+    //eventToAdd.index = ++eventIndex;
+
     NODE* newNode = createNode(eventToAdd);
 
     if (list->head == NULL)    // if list is empty
@@ -48,10 +50,6 @@ bool addEventToList(LIST* list, EVENT eventToAdd)
     return true;
 }
 
-// This should only be used with compareFullEvent(), compareEventTimeAndDate(),
-// or compareEventDate() (for all-day events).  It will simply delete the first
-// event it finds that matches whatever criterion is given, so unique critera 
-// are best to avoid unexpected behaviour.  
 bool removeEventFromList(LIST* list, EVENT* eventToDelete,
         bool (*compareEvents)(EVENT* left, EVENT* right))
 {

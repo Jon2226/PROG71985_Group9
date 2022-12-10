@@ -1,4 +1,5 @@
-﻿// PROG71985 - Fall 2022
+﻿// PROG71985 - Fall 2022 - Group Project
+// Group 9: Jonathan Ward, Drasti Patel, Komalpreet Kaur
 // Jonathan Ward
 
 // implementation of functions to save/load data file
@@ -137,6 +138,13 @@ bool readListFromStream(LIST* list, FILE* stream)
     if (strncmp(buffer, "Total:", 6) != 0)
         printError("possible error in data file");
 
+    //// previous highest index value
+    //if (fscanf(stream, "%d\n\n", &eventIndex) != 1)
+    //{
+    //    printError("unable to get event index from data file");
+    //    return false;
+    //}
+
     *list = createList();    // re-initialize in case data was added
 
     int numEvents = 0;
@@ -158,6 +166,7 @@ bool readListFromStream(LIST* list, FILE* stream)
 
 void printEventToStream(EVENT* e, FILE* stream)
 {
+    fprintf(stream, "%d\n", e->index);
     fprintf(stream, "%d,%d,%d\n", (int)e->allDay, e->type, e->recurrence);
     fprintf(stream, "%s\n", e->description);
     printTimeToStream(&e->startTime, stream);
@@ -165,13 +174,16 @@ void printEventToStream(EVENT* e, FILE* stream)
 
 EVENT readEventFromStream(FILE* stream)
 {
+    int index = 0;
     int allDay = false;
     EVENT_TYPE type = OTHER;
     RECURRENCE recurrence = NONE;
 
-    char description[LONGEST_LINE] = { 0 };
-    fgets(description, LONGEST_LINE, stream);
-    removeNewLineFromString(description);
+    if (fscanf(stream, "%d\n", &index) != 1)
+    {
+        printError("problem reading event index from file.\n");
+        index = 0;
+    }
 
     if ((fscanf(stream, "%d,%d,%d\n", &allDay, &type, &recurrence)) != 3)
     {
@@ -180,9 +192,14 @@ EVENT readEventFromStream(FILE* stream)
         type = OTHER;
         recurrence = NONE;
     }
+    char description[LONGEST_LINE] = { 0 };
+    fgets(description, LONGEST_LINE, stream);
+    removeNewLineFromString(description);
+
     TIME startTime = readTimeFromStream(stream);
 
-    return createEvent((bool)allDay, type, recurrence, description, startTime);
+    EVENT e = createEvent((bool)allDay, type, recurrence, description, startTime);
+    return e;
 }
 
 void printTimeToStream(TIME* t, FILE* stream)

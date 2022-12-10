@@ -1,5 +1,6 @@
 ﻿// PROG71985 - Fall 2022 - Group Project
 // Group 9: Jonathan Ward, Drasti Patel, Komalpreet Kaur
+// Jonathan Ward
 
 // implementation of user interface functions for calendar application
 
@@ -97,7 +98,7 @@ void userAddEvent(LIST* eventList)
     while (!inputDate(&dateAndTime))
         puts("Invalid date.  Please try again.");
 
-    puts("Will the event last all day?");
+    puts("Will the event last all day?  (y/n)");
     if (yes())
     {
         newEvent.allDay = true;
@@ -121,7 +122,36 @@ void userAddEvent(LIST* eventList)
 
 void userDeleteEvent(LIST* eventList)
 {
+    // using index because it's the only way to uniquely identify an event/node
+    int index = 0;
+    puts("Please enter the index of the event you want to cancel.");
+    while (!getIntegerInput(&index))
+        puts("Invalid input.  Please try again.");
 
+    EVENT* result = NULL;
+    EVENT shellEvent = createZeroedEvent();
+    shellEvent.index = index;
+
+    // shouldn't need a loop since the index is unique
+    result = searchListForEvent(eventList, &shellEvent, compareEventIndex);
+    if (result == NULL)
+    {
+        puts("Event not found.");
+        return;
+    }
+    displayEvent(result);
+    puts("Please confirm that this is the event you want to delete.  (y/n)");
+    if (yes())
+    {
+        if (removeEventFromList(eventList, &shellEvent, compareEventIndex))
+            puts("Event deleted.");
+        else
+            puts("Event not found.");
+    }
+    else
+    {
+        puts("No action taken.");
+    }
 }
 
 void userModifyEvent(LIST* eventList)
@@ -211,10 +241,11 @@ bool runSearchMenu(LIST* eventList)
 {
     horizontalLine();
     puts("\nPlease enter a number corresponding to the search parameter you wish to use.");
-    puts("\t1.  Event description.");
+    puts("\t1.  Event index (unique).");
     puts("\t2.  Event type.");
     puts("\t3.  Event recurrence.");
-    puts("\t4.  Time of day.");
+    puts("\t4.  Event description.");
+    puts("\t5.  Time of day.");
     puts("\t0.  Return to main menu.\n");
 
     EVENT* result = NULL;
@@ -228,16 +259,17 @@ bool runSearchMenu(LIST* eventList)
     puts("");    // newline
     switch (ch)
     {
-    case '1':    // search by event description
-        puts("Please enter the description of the event you are searching for.");
-        while (!getStringInput(description, MAX_DESC))
+    case '1':    // search by event index (unique)
+        puts("Please enter the event index number you are searching for.");
+        int index = 0;
+        while (!getIntegerInput(&index))
             puts("Invalid input.  Please try again.");
 
-        strncpy(shellEvent.description, description, MAX_DESC);
-        shellEvent.description[MAX_DESC - 1] = '\0';
+        // shouldn't need to loop, but if we get more than one result, then 
+        // we'll know there's a problem.
         do
         {
-            result = searchListForEvent(eventList, &shellEvent, compareEventDescription);
+            result = searchListForEvent(eventList, &shellEvent, compareEventIndex);
             if (result != NULL)
                 displayEvent(result);
         } while (result != NULL);
@@ -267,7 +299,22 @@ bool runSearchMenu(LIST* eventList)
         } while (result != NULL);
         break;
 
-    case '4':    // search by time of day
+    case '4':    // search by event description
+        puts("Please enter the description of the event you are searching for.");
+        while (!getStringInput(description, MAX_DESC))
+            puts("Invalid input.  Please try again.");
+
+        strncpy(shellEvent.description, description, MAX_DESC);
+        shellEvent.description[MAX_DESC - 1] = '\0';
+        do
+        {
+            result = searchListForEvent(eventList, &shellEvent, compareEventDescription);
+            if (result != NULL)
+                displayEvent(result);
+        } while (result != NULL);
+        break;
+        
+    case '5':    // search by time of day
         inputTime(&eventTime);
         shellEvent.startTime = copyTime(eventTime);
         do
@@ -383,6 +430,7 @@ RECURRENCE inputAndReturnRecurrence(void)
         printf("\t%d.  %s\n", i + 1, getRecurrenceString(i));
 
     int input = 0;
+
     while (!getIntegerInput(&input) || input < (NONE + 1) || input > YEARLY_BY_WEEKDAY)
         puts("Invalid input.  Please try again.");
     
@@ -392,14 +440,17 @@ RECURRENCE inputAndReturnRecurrence(void)
 bool inputTime(TIME* eventTime)
 {
     puts("Please input the time (in 24-hour time, with the format HH:MM) of the event.");
-    char timeString[SHORT_TIME_LEN] = { 0 };
-    while (!getStringInput(timeString, SHORT_TIME_LEN))
+    while (scanf("%d:%d", &eventTime->tm_hour, &eventTime->tm_min) != 2)
         puts("Invalid input.  Please try again.");
 
-    if (!tokenizeToInteger(timeString, "/", &eventTime->tm_hour))
-        return false;
-    if (!tokenizeToInteger(timeString, "\0", &eventTime->tm_min))
-        return false;
+    //char timeString[SHORT_TIME_LEN] = { 0 };
+    //while (!getStringInput(timeString, SHORT_TIME_LEN))
+    //    puts("Invalid input.  Please try again.");
+
+    //if (!tokenizeToInteger(timeString, "/", &eventTime->tm_hour))
+    //    return false;
+    //if (!tokenizeToInteger(timeString, "\0", &eventTime->tm_min))
+    //    return false;
 
     if (!isValidTime(eventTime))
     {
@@ -412,23 +463,27 @@ bool inputTime(TIME* eventTime)
 
 bool inputDate(TIME* date)
 {
-    puts("Please input a date (in the format YYYY/MM/DD), or enter 'C' for current date.");
-    char dateString[SHORT_DATE_LEN] = { 0 };
-    while (!getStringInput(dateString, SHORT_DATE_LEN))
+    puts("Please input a date (in the format YYYY/MM/DD).");
+
+    while (scanf("%d/%d/%d", &date->tm_year, &date->tm_mon, &date->tm_mday) != 3)
         puts("Invalid input.  Please try again.");
 
-    if (dateString[0] == 'c' || dateString[0] == 'C')
-    {
-        currentDate(date);
-        return true;
-    }
+    //char dateString[SHORT_DATE_LEN] = { 0 };
+    //while (!getStringInput(dateString, SHORT_DATE_LEN))
+    //    puts("Invalid input.  Please try again.");
 
-    if (!tokenizeToInteger(dateString, "/", &date->tm_year))
-        return false;
-    if (!tokenizeToInteger(dateString, "/", &date->tm_mon))
-        return false;
-    if (!tokenizeToInteger(dateString, "\0", &date->tm_mday))
-        return false;
+    //if (dateString[0] == 'c' || dateString[0] == 'C')
+    //{
+    //    currentDate(date);
+    //    return true;
+    //}
+
+    //if (!tokenizeToInteger(dateString, "/", &date->tm_year))
+    //    return false;
+    //if (!tokenizeToInteger(dateString, "/", &date->tm_mon))
+    //    return false;
+    //if (!tokenizeToInteger(dateString, "\0", &date->tm_mday))
+    //    return false;
 
     if (!isValidDate(date))
     {

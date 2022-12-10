@@ -1,22 +1,26 @@
-To-do (unsorted)
-
+To-do
+	-- lots of testing
+	-- fix strtok usage to properly parse dates/times and accept/reject values appropriately so we don't need scanf
 	-- properly create/implement recurring events
 	-- improve formatting of remaining time display
-	-- add function to call strtok and convert input to int, for code readability/reusability
-	-- replace use of \t with something more portable (since tab widths will differ by what runs the program)
+	-- organize printed events chronologically (by calling qsort with pointer to time and date comparison function)
+	-- print number of results from a search
 	-- move 'menu' functions to separate component from 'interface' so it's less cluttered
-	-- enum for menu options, or use letters
+	-- enum for menu options and convert input to integer (readability)
+	-- come up with a more stable solution for uniquely identifying events than the global eventIndex variable 
+			-- (which would be a static int in either the addEventToList() or createEvent() function, but it also needs to be initialized/reset when loading files)
+
 	-- add escape characters to for user to back out of ALL input menus
 	-- implement end time for events, and/or duration
-		-- check for schedule conflicts when adding an event, and ask user to confirm or change the time
+			-- check for schedule conflicts when adding an event, and ask user to confirm or change the time
 	-- test/refactor for DST and different timezones compatability
-	-- possibly refactor the whole project to rename EVENT, since it turns out Microsoft very annoyingly defines 'event' as a keyword in the .NET framework (which leads to non-standard syntax highlighting in Visual Studio, and potentially a lot of confusion)
-		-- for now, variables have been renamed 
 	-- display for week in tabular format (Mon Tue Wed Thu Fri Sat Sun) with events listed below each day
+	-- display for month/year in calendar format (like Unix cal command, but with an asterisk (*) or other marker for days that have events
 
 	-- make an enumerated array of function pointers for different search methods used in the search/range menu (i.e. to replace the switch statements, to make those menu functions leaner and more readable)
 
-	-- revise search algorithm to continue to the end of the list every time and collect all results at once (by storing them in a second list): this will be much more efficient than re-searching the entire list until we reach the end
+	-- revise search algorithm to continue to the end of the list and collect all results at once (by storing results in a secondary list of pointers, instead of returning one result at a time)
+			-- this will be much more efficient than re-searching the entire list in a loop until we reach the end
 
 	-- fuzzy search
 		-- case-insensitive
@@ -25,6 +29,5 @@ To-do (unsorted)
 
 	-- allow user to define custom event type names
 	-- look at iCal format and consider feasability of import/export
-
--- learn ncurses to make the I/O way cooler
+	-- learn ncurses to replace current I/O
 
