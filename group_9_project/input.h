@@ -18,5 +18,7 @@ bool getStringInput(char* response, size_t max);
 bool getIntegerInput(int* response);
 bool getDoubleInput(double* response);
 int getDoubleInputWithEscape(double* userInput, char finished, char cancel);
+bool tokenizeToInteger(char* str, char* delim, int* integer);
 
 char returnSingleChar(void);
+bool yes(void);

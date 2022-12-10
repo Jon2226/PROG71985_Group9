@@ -22,7 +22,7 @@ bool loadDataFromFile(LIST* list, char* dataFileName);
 void printListToStream(LIST* list, FILE* stream);
 bool readListFromStream(LIST* list, FILE* stream);
 
-void printEventToStream(EVENT* event, FILE* stream);
+void printEventToStream(EVENT* e, FILE* stream);
 EVENT readEventFromStream(FILE* stream);
 
 void printTimeToStream(TIME* t, FILE* stream);

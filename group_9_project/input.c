@@ -3,13 +3,14 @@
 
 // implementation of common user input routines
 
+#define _CRT_SECURE_NO_WARNINGS
 #include "input.h"
 #include <string.h>
 #include <stdlib.h>
 #include <ctype.h>
 
-#define MAXSTRINGTODOUBLE		20
-#define MAXSTRINGTOINT		    12      // more than enough for unsigned long
+#define MAX_STRING_TO_DOUBLE		20
+#define MAX_STRING_TO_INT		    12      // more than enough for unsigned long
 
 void removeNewLineFromString(char* string)
 {
@@ -91,8 +92,8 @@ bool getStringInput(char* userInput, size_t maxLength)
 
 bool getIntegerInput(int* userInput)
 {
-    char input[MAXSTRINGTOINT];
-    if (fgets(input, (int)MAXSTRINGTOINT, stdin) == NULL)
+    char input[MAX_STRING_TO_INT] = { 0 };
+    if (fgets(input, (int)MAX_STRING_TO_INT, stdin) == NULL)
         return false;
     removeNewLineFromString(input);
 
@@ -107,8 +108,8 @@ bool getIntegerInput(int* userInput)
 
 bool getDoubleInput(double* userInput)
 {
-    char input[MAXSTRINGTODOUBLE];
-    if (fgets(input, (int)MAXSTRINGTODOUBLE, stdin) == NULL)
+    char input[MAX_STRING_TO_DOUBLE] = { 0 };
+    if (fgets(input, (int)MAX_STRING_TO_DOUBLE, stdin) == NULL)
         return false;
     removeNewLineFromString(input);
 
@@ -126,8 +127,8 @@ bool getDoubleInput(double* userInput)
 int getDoubleInputWithEscape(double* userInput,
     char finished, char cancel)
 {
-    char input[MAXSTRINGTODOUBLE];
-    fgets(input, (int)MAXSTRINGTODOUBLE, stdin);
+    char input[MAX_STRING_TO_DOUBLE] = { 0 };
+    fgets(input, (int)MAX_STRING_TO_DOUBLE, stdin);
     removeNewLineFromString(input);
 
     if (input[0] == finished || tolower(input[0]) == finished)
@@ -144,6 +145,17 @@ int getDoubleInputWithEscape(double* userInput,
     }
 }
 
+bool tokenizeToInteger(char* str, char* delim, int* integer)
+{
+    char* token;
+    if ((token = strtok(str, delim)) != NULL && stringIsNumeric(token))
+    {
+        *integer = atoi(token);
+        return true;
+    }
+    return false;
+}
+
 // for collecting single char e.g. for menu inputs, and ignoring everything 
 // that comes afterward (e.g. the dangling newline)
 char returnSingleChar(void)
@@ -155,4 +167,13 @@ char returnSingleChar(void)
         garbage = getc(stdin);
 
     return firstChar;
+}
+
+bool yes(void)
+{
+    char ch = returnSingleChar();
+    if (ch == 'y' || ch == 'Y')
+        return true;
+    else
+        return false;
 }

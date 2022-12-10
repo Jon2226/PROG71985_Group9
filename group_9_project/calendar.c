@@ -5,22 +5,23 @@
 #include "error.h"
 #include <stdio.h>
 #include <string.h>
+#include <ctype.h>
 
 // implementation of functions for handling time/date information
 
 TIME createTime(int sec, int min, int hour, int mday, int mon, int year, 
     int wday, int yday, int isdst)
 {
-    TIME t = { 0 };
-    t.tm_sec = sec;
-    t.tm_min = min;
-    t.tm_hour = hour;
-    t.tm_mday = mday;
-    t.tm_mon = mon;
-    t.tm_year = year;
-    t.tm_wday = wday;
-    t.tm_yday = yday;
-    t.tm_isdst = isdst;
+    TIME t      = { 0 };
+    t.tm_sec    = sec;
+    t.tm_min    = min;
+    t.tm_hour   = hour;
+    t.tm_mday   = mday;
+    t.tm_mon    = mon;
+    t.tm_year   = year;
+    t.tm_wday   = wday;
+    t.tm_yday   = yday;
+    t.tm_isdst  = isdst;
 
     if (!isValidTime(&t))
         printError("Possible error in assigned time data.");
@@ -31,15 +32,15 @@ TIME createTime(int sec, int min, int hour, int mday, int mon, int year,
 // preferable to avoid falling outside valid ranges - as opposed to = { 0 }
 TIME createZeroedTime(void)
 {
-    int sec = 0;
-    int min = 0;
-    int hour = 0;
-    int mday = 1;    // staying within valid range
-    int mon = JAN;
-    int year = 0;
-    int wday = SUN;
-    int yday = 0;
-    int isdst = -1;    // meaning information unavailable
+    int sec     = 0;
+    int min     = 0;
+    int hour    = 0;
+    int mday    = 1;    // staying within valid range
+    int mon     = JAN;
+    int year    = 0;
+    int wday    = SUN;
+    int yday    = 0;
+    int isdst   = -1;    // meaning information unavailable
     return createTime(sec, min, hour, mday, mon, year, wday, yday, isdst);
 }
 
@@ -83,10 +84,10 @@ bool isLeapYear(TIME* t)
 
 bool isValidDate(TIME* t)
 {
-    if ((t->tm_mday < 1 || t->tm_mday > daysPerMonth(t))
-     || (t->tm_mon < 0 || t->tm_mon > MAX_MONTH)
-     || (t->tm_wday > SAT || t->tm_wday < SUN)
-     || (t->tm_yday < 0 || t->tm_yday > MAX_DAY))
+    if ((t->tm_mday < 1   || t->tm_mday > daysPerMonth(t))
+     || (t->tm_mon < 0    || t->tm_mon > MAX_MONTH)
+     || (t->tm_wday < SUN || t->tm_wday > SAT)
+     || (t->tm_yday < 0   || t->tm_yday > MAX_DAY))
         return false;
 
     return true;
@@ -94,8 +95,8 @@ bool isValidDate(TIME* t)
 
 bool isValidTime(TIME* t)
 {
-    if ((t->tm_sec < 0 || t->tm_sec > MAX_SEC)
-     || (t->tm_min < 0 || t->tm_min > MAX_MIN)
+    if ((t->tm_sec < 0  || t->tm_sec > MAX_SEC)
+     || (t->tm_min < 0  || t->tm_min > MAX_MIN)
      || (t->tm_hour < 0 || t->tm_hour > MAX_HOUR))
         return false;
 
@@ -105,6 +106,7 @@ bool isValidTime(TIME* t)
 bool isValidDateAndTime(TIME* t)
 {
     return isValidDate(t) && isValidTime(t);
+
     /* better to split these functions
     if (t->tm_sec < 0 || t->tm_sec > MAX_SEC)
         return false;
@@ -156,6 +158,71 @@ int daysPerMonth(TIME* t)
     }
 }
 
+MONTH getMonthEnum(char* monthName)
+{
+    monthName[0] = tolower(monthName[0]);
+
+    if (strncmp(monthName, "january", MAX_MONTH_NAME))
+        return JAN;
+    if (strncmp(monthName, "february", MAX_MONTH_NAME))
+        return FEB;
+    if (strncmp(monthName, "march", MAX_MONTH_NAME))
+        return MAR;
+    if (strncmp(monthName, "april", MAX_MONTH_NAME))
+        return APR;
+    if (strncmp(monthName, "may", MAX_MONTH_NAME))
+        return MAY;
+    if (strncmp(monthName, "june", MAX_MONTH_NAME))
+        return JUN;
+    if (strncmp(monthName, "july", MAX_MONTH_NAME))
+        return JUL;
+    if (strncmp(monthName, "august", MAX_MONTH_NAME))
+        return AUG;
+    if (strncmp(monthName, "september", MAX_MONTH_NAME))
+        return SEP;
+    if (strncmp(monthName, "october", MAX_MONTH_NAME))
+        return OCT;
+    if (strncmp(monthName, "november", MAX_MONTH_NAME))
+        return NOV;
+    if (strncmp(monthName, "december", MAX_MONTH_NAME))
+        return DEC;
+
+    return -1;
+}
+
+char* getMonthName(MONTH month)
+{
+    switch (month)
+    {
+    case JAN: 
+        return "January";
+    case FEB:
+        return "February";
+    case MAR:
+        return "March";
+    case APR:
+        return "April";
+    case MAY:
+        return "May";
+    case JUN:
+        return "June";
+    case JUL:
+        return "July";
+    case AUG:
+        return "August";
+    case SEP:
+        return "September";
+    case OCT:
+        return "October";
+    case NOV:
+        return "November";
+    case DEC:
+        return "December";
+    default: 
+        return NULL;
+    }
+}
+
 char* getEventTypeString(EVENT_TYPE type)
 {
     switch (type)
@@ -204,6 +271,39 @@ char* getRecurrenceString(RECURRENCE recurrence)
     }
 }
 
+void currentDate(TIME* t)
+{
+    time_t now = time(NULL);
+    TIME* pTimeNow = localtime(&now);
+
+    t->tm_year  = pTimeNow->tm_year;
+    t->tm_mon   = pTimeNow->tm_mon;
+    t->tm_mday  = pTimeNow->tm_mday;
+}
+
+void currentTime(TIME* t)
+{
+    time_t now = time(NULL);
+    TIME* pTimeNow = localtime(&now);
+
+    t->tm_hour  = pTimeNow->tm_hour;
+    t->tm_min   = pTimeNow->tm_min;
+    t->tm_sec   = pTimeNow->tm_sec;
+}
+
+void currentDateAndTime(TIME* t)
+{
+    time_t now = time(NULL);
+    TIME* pTimeNow = localtime(&now);
+
+    t->tm_year = pTimeNow->tm_year;
+    t->tm_mon = pTimeNow->tm_mon;
+    t->tm_mday = pTimeNow->tm_mday;
+    t->tm_hour = pTimeNow->tm_hour;
+    t->tm_min = pTimeNow->tm_min;
+    t->tm_sec = pTimeNow->tm_sec;
+}
+
 void displayTime(TIME* t)
 {
     char time[MAX_DATE_LEN] = { 0 };
@@ -233,7 +333,6 @@ void displayLongDate(TIME* t)
 
 void displayCurrentDate(void)
 {
-    char date[MAX_DATE_LEN] = { 0 };
     time_t now = time(NULL);
     TIME* pTimeNow = localtime(&now);
 

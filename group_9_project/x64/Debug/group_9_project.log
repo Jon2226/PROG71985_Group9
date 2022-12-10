@@ -1,7 +1,2 @@
 ﻿  interface.c
-C:\Users\Jon\Documents\Nextcloud\Code\Git\PROG71985_Group9\group_9_project\interface.c(239,45): warning C4047: '=': 'EVENT *' differs in levels of indirection from 'int'
-C:\Users\Jon\Documents\Nextcloud\Code\Git\PROG71985_Group9\group_9_project\interface.c(249,38): warning C4047: '=': 'EVENT *' differs in levels of indirection from 'int'
-C:\Users\Jon\Documents\Nextcloud\Code\Git\PROG71985_Group9\group_9_project\interface.c(259,44): warning C4047: '=': 'EVENT *' differs in levels of indirection from 'int'
-C:\Users\Jon\Documents\Nextcloud\Code\Git\PROG71985_Group9\group_9_project\interface.c(270,38): warning C4047: '=': 'EVENT *' differs in levels of indirection from 'int'
-C:\Users\Jon\Documents\Nextcloud\Code\Git\PROG71985_Group9\group_9_project\interface.c(281,45): warning C4047: '=': 'EVENT *' differs in levels of indirection from 'int'
   group_9_project.vcxproj -> C:\Users\Jon\Documents\Nextcloud\Code\Git\PROG71985_Group9\x64\Debug\group_9_project.exe

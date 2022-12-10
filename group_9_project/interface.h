@@ -19,19 +19,19 @@ void saveToGivenFile(LIST* eventList);
 bool runRangeMenu(LIST* eventList);
 bool runSearchMenu(LIST* eventList);
 
-void displayWeek(LIST* eventList);
-void displayMonth(LIST* eventList);
-void displayYear(LIST* eventList);
-void displayAllEvents(LIST* eventList);
+void displayEventsForDate(LIST* eventList);
+void displayEventsForWeek(LIST* eventList);
+void displayEventsForMonth(LIST* eventList);
+void displayEventsForYear(LIST* eventList);
+void displayRange(LIST* eventList);
 
 EVENT_TYPE inputAndReturnEventType(void);
 RECURRENCE inputAndReturnRecurrence(void);
 
-void inputDateAndTime(TIME* time);
-void inputDate(TIME* date);
-void inputWeek(TIME* week);
-void inputMonth(TIME* month);
-void inputYear(TIME* year);
+bool inputTime(TIME* eventTime);
+bool inputDate(TIME* date);
+bool inputWeek(TIME* week);
+bool inputMonth(TIME* month);
+bool inputYear(TIME* year);
 
-bool exitWithoutSave(void);
 void horizontalLine(void);

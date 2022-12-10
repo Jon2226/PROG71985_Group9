@@ -10,7 +10,13 @@
 
 // string size limits
 #define MAX_TIME_LEN        10
+#define SHORT_TIME_LEN       6
 #define MAX_DATE_LEN        30
+#define SHORT_DATE_LEN      11
+#define MAX_MONTH_NAME      15
+#define MAX_YEAR_LEN         5
+#define MAX_MON_LEN          3
+#define MAX_DAY_LEN          3
 #define MAX_TYPE_LEN        20
 #define MAX_REP_LEN         30
 
@@ -39,10 +45,9 @@ typedef enum Month
     DEC = 11,
 } MONTH;
 
-// possibly unnecessary since mktime() sets weekday automatically
-typedef enum Weekday
-{
-    SUN = 0,    // consistent with 'struct tm' in <time.h>
+typedef enum Weekday    // Possibly unnecessary since mktime() sets weekday 
+{                       // automatically and strftime can get the string.
+    SUN = 0,    // Starting at 0, consistent with 'struct tm' in <time.h>
     MON = 1,
     TUE = 2,
     WED = 3,
@@ -63,9 +68,9 @@ typedef enum EventType
     OTHER           = 8,
 } EVENT_TYPE;
 
-typedef enum Recurrence    // interval of event recurrence (or 0 for none)
+typedef enum Recurrence         // interval of event recurrence
 {
-    NONE                = 0,
+    NONE                = 0,    // for non-repeating events
     DAILY               = 1,
     WEEKLY              = 2,
     MONTHLY             = 3,
@@ -75,7 +80,7 @@ typedef enum Recurrence    // interval of event recurrence (or 0 for none)
 } RECURRENCE;
 
 
-typedef struct tm TIME;           // broken-down time format from <time.h>
+typedef struct tm TIME;         // broken-down time format from <time.h>
 
 TIME createTime(int sec, int min, int hour, int mday, int mon, int year,
     int wday, int yday, int isdst);
@@ -90,9 +95,14 @@ bool isValidTime(TIME* t);
 bool isValidDateAndTime(TIME* t);
 int daysPerMonth(TIME* t);
 
+MONTH getMonthEnum(char* monthName);
+char* getMonthName(MONTH month);
 char* getEventTypeString(EVENT_TYPE type);
 char* getRecurrenceString(RECURRENCE recurrence);
 
+void currentDate(TIME* t);
+void currentTime(TIME* t);
+void currentDateAndTime(TIME* t);
 void displayTime(TIME* t);
 void displayDate(TIME* t);
 void displayLongDate(TIME* t);

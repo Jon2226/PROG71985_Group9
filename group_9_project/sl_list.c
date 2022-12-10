@@ -25,9 +25,9 @@ void disposeList(LIST* list)
     }
 }
 
-bool addEventToList(LIST* list, EVENT event)
+bool addEventToList(LIST* list, EVENT eventToAdd)
 {
-    NODE* newNode = createNode(event);
+    NODE* newNode = createNode(eventToAdd);
 
     if (list->head == NULL)    // if list is empty
     {
@@ -115,8 +115,7 @@ void displayList(LIST* list)
     }
 }
 
-
-EVENT* searchListForEvent(LIST* list, EVENT* event,
+EVENT* searchListForEvent(LIST* list, EVENT* eventToCompare,
         bool (*compareEvents)(EVENT* left, EVENT* right))
 {
     EVENT* notFoundEvent = NULL;
@@ -127,7 +126,26 @@ EVENT* searchListForEvent(LIST* list, EVENT* event,
     NODE* current = list->head;
     do
     {
-        if (compareEvents(event, getEventFromNode(current)))
+        if (compareEvents(eventToCompare, getEventFromNode(current)))
+            return getEventFromNode(current);
+
+        current = getNextNode(current);
+    } while (current != NULL);
+
+    return notFoundEvent;
+}
+
+EVENT* searchListForEventByTimeRange(LIST* list, TIME* start, TIME* end)
+{
+    EVENT* notFoundEvent = NULL;
+
+    if (list->head == NULL)
+        return notFoundEvent;
+
+    NODE* current = list->head;
+    do
+    {
+        if (eventWithinTimeRange(getEventFromNode(current), start, end))
             return getEventFromNode(current);
 
         current = getNextNode(current);

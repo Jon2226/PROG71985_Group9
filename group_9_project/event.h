@@ -22,7 +22,10 @@ EVENT createEvent(bool allDay, EVENT_TYPE type, RECURRENCE recurrence,
 EVENT createZeroedEvent(void);
 void destroyEvent(EVENT* e);
 EVENT copyEvent(EVENT e);
-EVENT copyEventToNewTime(EVENT e, TIME t);
+EVENT copyEventToDifferentTime(EVENT e, TIME t);
+void addTimeToEventDate(EVENT* e, TIME* t);
+TIME remainingTime(EVENT* e);
+void displayRemainingTime(EVENT* e);
 void displayEvent(EVENT* e);
 
 // these will be called by function pointer parameters to search/remove
@@ -32,9 +35,14 @@ bool compareEventType(EVENT* left, EVENT* right);
 bool compareEventRecurrence(EVENT* left, EVENT* right);
 bool compareEventDescription(EVENT* left, EVENT* right);
 bool compareEventDate(EVENT* left, EVENT* right);
+bool compareEventTime(EVENT* left, EVENT* right);
 bool compareEventDateAndTime(EVENT* left, EVENT* right);
+bool compareEventYear(EVENT* left, EVENT* right);
+bool compareEventYearAndMonth(EVENT* left, EVENT* right);
 bool isFirstEventAfterSecond(EVENT* first, EVENT* second);
 bool isFirstEventBeforeSecond(EVENT* first, EVENT* second);
+
+bool eventWithinTimeRange(EVENT* e, TIME* start, TIME* end);
 
 // don't need these since we're just passing the above functions as parameters
 // for search and remove

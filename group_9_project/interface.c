@@ -7,19 +7,21 @@
 #include "file_io.h"
 #include "input.h"
 #include "error.h"
+#include <stdlib.h>
 #include <string.h>
 
 void displayMainMenu(void)
 {
     horizontalLine();
+    fputs("\t\t\t", stdout);
     displayCurrentDate();
-    puts("");   // newline
+    puts("");    // newline
     horizontalLine();
     puts("Please enter one of the following numbers corresponding to a command.");
     puts("\t1.  Add an event.");
     puts("\t2.  Delete an event.");
     puts("\t3.  Modify an event.");
-    puts("\t4.  Display events for a given range of time.");
+    puts("\t4.  Display events for a given time period.");
     puts("\t5.  Search for an event.");
     puts("\t6.  Load event data from a given file.");
     puts("\t7.  Save event data to a given file.");
@@ -69,9 +71,12 @@ bool runMainMenu(LIST* eventList, char* dataFileName)
 
     case '0':
         if (!saveDataToFile(eventList, dataFileName))
-            if (!exitWithoutSave())
-                return true;
-
+        {
+            puts("\nError saving data to file.");
+            puts("Would you like to exit without saving?  (y/n)");
+            if (!yes())
+                return true;    // back to menu
+        }
         return false;    // end the program
         break;           // defensive coding
 
@@ -84,22 +89,38 @@ bool runMainMenu(LIST* eventList, char* dataFileName)
 
 void userAddEvent(LIST* eventList)
 {
-    bool allDay = false;
-    char description[MAX_DESC] = { 0 };
-    TIME startTime = { 0 };
-
+    EVENT newEvent = createZeroedEvent();
+    TIME dateAndTime = createZeroedTime();
     puts("Please enter a number for the type of event to be scheduled.");
-    EVENT_TYPE type = inputAndReturnEventType();
-    puts("Please enter the date of the event to be scheduled (YYYY/MM/DD)");
-    
-    // if all day, skip inputing time
+    newEvent.type = inputAndReturnEventType();
+
+    while (!inputDate(&dateAndTime))
+        puts("Invalid date.  Please try again.");
+
+    puts("Will the event last all day?");
+    if (yes())
+    {
+        newEvent.allDay = true;
+    }
+    else
+    {
+        while (!inputTime(&dateAndTime))
+            puts("Invalid time.  Please try again.");
+        addTimeToEventDate(&newEvent, &dateAndTime);
+    }
     puts("Please enter a number for the recurrence of the event.");
-    RECURRENCE recurrence = inputAndReturnRecurrence();
+    newEvent.recurrence = inputAndReturnRecurrence();
+
+    puts("Please enter a description for this event.");
+    while (!getStringInput(newEvent.description, MAX_DESC))
+        puts("Invalid input.  Please try again.");
+
+    addEventToList(eventList, newEvent);
+    puts("Your event has been added.\n");
 }
 
 void userDeleteEvent(LIST* eventList)
 {
-
 
 }
 
@@ -114,7 +135,7 @@ void loadFromGivenFile(LIST* eventList)
     puts("Please enter the name of the file you wish to load.");
 
     while (!getStringInput(fileName, MAX_FILE_NAME))
-        puts("Please try again.");
+        puts("Invalid input.  Please try again.");
 
     if (!loadDataFromFile(eventList, fileName))
         printError("data file absent or unable to load");
@@ -126,7 +147,7 @@ void saveToGivenFile(LIST* eventList)
     puts("Please enter a name for the save file.");
 
     while (!getStringInput(fileName, MAX_FILE_NAME))
-        puts("Please try again.");
+        puts("Invalid input.  Please try again.");
 
     if (!saveDataToFile(eventList, fileName))
         printError("unable to open data file for save.");
@@ -139,37 +160,40 @@ bool runRangeMenu(LIST* eventList)
     horizontalLine();
     puts("\nPlease enter one of the following numbers.");
     puts("\t1.  Display events for a given day.");
-    puts("\t2.  Display events for a given week.");
-    puts("\t3.  Display events for a given month.");
-    puts("\t4.  Display events for a given year.");
-    puts("\t5.  Display all events.");
-    //puts("6.\tDisplay events between two given days.");
+    //puts("\t2.  Display events for a given week.");    // not implemented yet
+    puts("\t2.  Display events for a given month.");
+    puts("\t3.  Display events for a given year.");
+    puts("\t4.  Display all events.");
+    puts("\t5.  Display events between two given days.");
     puts("\t0.  Return to main menu.\n");
 
     char ch = returnSingleChar();
+    puts("");    // newline
     switch (ch)
     {
-    case '1':
+    case '1':    // search by date
+        displayEventsForDate(eventList);
         break;
 
+    //case '2':
+    //    displayEventsForWeek(eventList);
+    //    break;
+
     case '2':
-        displayWeek(eventList);
+        displayEventsForMonth(eventList);
         break;
 
     case '3':
-        displayMonth(eventList);
+        displayEventsForYear(eventList);
         break;
 
-    case '4':
-        displayYear(eventList);
+    case '4':    // all events
+        displayList(eventList);
         break;
 
-    case '5':
-        displayAllEvents(eventList);
+    case '5':    // range of events based on two given dates
+        displayRange(eventList);
         break;
-
-    //case '6':
-    //    break;
 
     case '0':
         return false;
@@ -181,29 +205,6 @@ bool runRangeMenu(LIST* eventList)
         break;
     }
     return true;    // re-run menu
-}
-
-void displayWeek(LIST* eventList)
-{
-    
-}
-
-void displayMonth(LIST* eventList)
-{
-    char month[MAX_DATE_LEN] = { 0 };
-    int year = 0;
-    puts("%s %d");
-    puts("\tMon Tue Wed Thu Fri Sat Sun\t");
-}
-
-void displayYear(LIST* eventList)
-{
-
-}
-
-void displayAllEvents(LIST* eventList)
-{
-
 }
 
 bool runSearchMenu(LIST* eventList)
@@ -213,73 +214,68 @@ bool runSearchMenu(LIST* eventList)
     puts("\t1.  Event description.");
     puts("\t2.  Event type.");
     puts("\t3.  Event recurrence.");
-    puts("\t4.  Event date.");
-    puts("\t5.  Event date and time.");
-    //puts("\t6.  Find every all-day event.");    // probably not that useful
+    puts("\t4.  Time of day.");
     puts("\t0.  Return to main menu.\n");
 
     EVENT* result = NULL;
     EVENT shellEvent = createZeroedEvent();
+    TIME eventTime = createZeroedTime();
+    EVENT_TYPE type = OTHER;
+    RECURRENCE recurrence = NONE;
     char description[MAX_DESC] = { 0 };
 
     char ch = returnSingleChar();
     puts("");    // newline
     switch (ch)
     {
-    case '1':
+    case '1':    // search by event description
         puts("Please enter the description of the event you are searching for.");
         while (!getStringInput(description, MAX_DESC))
-            puts("Please try again.");
+            puts("Invalid input.  Please try again.");
 
         strncpy(shellEvent.description, description, MAX_DESC);
         shellEvent.description[MAX_DESC - 1] = '\0';
-
-        // keep searching until the end of the list, and display each result
-        while (result = searchListForEvent(eventList, &shellEvent,
-            compareEventDescription) != NULL)
-            displayEvent(result);
+        do
+        {
+            result = searchListForEvent(eventList, &shellEvent, compareEventDescription);
+            if (result != NULL)
+                displayEvent(result);
+        } while (result != NULL);
         break;
 
-    case '2':
+    case '2':    // search by event type
         puts("Please enter the number of the event type you are searching for.");
-        EVENT_TYPE type = inputAndReturnEventType();
+        type = inputAndReturnEventType();
         shellEvent.type = type;
-
-        while (result = searchListForEvent(eventList, &shellEvent,
-            compareEventType) != NULL)
-            displayEvent(result);
+        do
+        {
+            result = searchListForEvent(eventList, &shellEvent, compareEventType);
+            if (result != NULL)
+                displayEvent(result);
+        } while (result != NULL);
         break;
 
-    case '3':
+    case '3':    // search by recurrence
         puts("Please enter the number of the recurrence pattern you are searching for.");
-        EVENT_TYPE recurrence = inputAndReturnRecurrence();
+        recurrence = inputAndReturnRecurrence();
         shellEvent.recurrence = recurrence;
-
-        while (result = searchListForEvent(eventList, &shellEvent, 
-            compareEventRecurrence) != NULL)
-            displayEvent(result);
+        do
+        {
+            result = searchListForEvent(eventList, &shellEvent, compareEventRecurrence);
+            if (result != NULL)
+                displayEvent(result);
+        } while (result != NULL);
         break;
 
-    case '4':
-        puts("Please enter the date you wish to display.");
-        TIME eventDate = createZeroedTime();
-        inputDate(&eventDate);
-        shellEvent.startTime = copyTime(eventDate);
-        
-        while (result = searchListForEvent(eventList, &shellEvent, 
-            compareEventDate) != NULL)
-            displayEvent(result);
-        break;
-
-    case '5':
-        puts("Please enter the date and time you wish to display.");
-        TIME eventTime = createZeroedTime();
-        inputDateAndTime(&eventTime);
+    case '4':    // search by time of day
+        inputTime(&eventTime);
         shellEvent.startTime = copyTime(eventTime);
-
-        while (result = searchListForEvent(eventList, &shellEvent,
-            compareEventDateAndTime) != NULL)
-            displayEvent(result);
+        do
+        {
+            result = searchListForEvent(eventList, &shellEvent, compareEventTime);
+            if (result != NULL)
+                displayEvent(result);
+        } while (result != NULL);
         break;
 
     case '0':
@@ -294,6 +290,79 @@ bool runSearchMenu(LIST* eventList)
     return true;    // re-run menu
 }
 
+void displayEventsForDate(LIST* eventList)
+{
+    puts("Please enter the date you wish to display.");
+    TIME date = createZeroedTime();
+    while (!inputDate(&date))
+        puts("Invalid date.  Please try again.");
+
+    EVENT shellEvent = createZeroedEvent();
+    shellEvent.startTime = copyTime(date);
+    EVENT* result = NULL;
+    do
+    {
+        result = searchListForEvent(eventList, &shellEvent, compareEventDate);
+        if (result != NULL)
+            displayEvent(result);
+    } while (result != NULL);
+}
+
+void displayEventsForWeek(LIST* eventList)
+{
+
+}
+
+void displayEventsForMonth(LIST* eventList)
+{
+    EVENT shellEvent = createZeroedEvent();
+    while (!inputMonth(&shellEvent.startTime))
+        puts("Invalid month.  Please try again.");
+
+    EVENT* result = NULL;
+    do
+    {
+        result = searchListForEvent(eventList, &shellEvent, compareEventYearAndMonth);
+        if (result != NULL)
+            displayEvent(result);
+    } while (result != NULL);
+    
+}
+
+void displayEventsForYear(LIST* eventList)
+{
+    EVENT shellEvent = createZeroedEvent();
+    while (!inputYear(&shellEvent.startTime))
+        puts("Invalid year.  Please try again.");
+
+    EVENT* result = NULL;
+    do
+    {
+        result = searchListForEvent(eventList, &shellEvent, compareEventYear);
+        if (result != NULL)
+            displayEvent(result);
+    } while (result != NULL);
+}
+
+void displayRange(LIST* eventList)
+{
+    EVENT* result = NULL;
+    TIME firstDay = createZeroedTime();
+    TIME lastDay = createZeroedTime();
+
+    puts("Beginning of time period to display: ");
+    inputTime(&firstDay);
+    puts("End of time period to display: ");
+    inputTime(&lastDay);
+
+    do
+    {
+        result = searchListForEventByTimeRange(eventList, &firstDay, &lastDay);
+        if (result != NULL)
+            displayEvent(result);
+    } while (result != NULL);
+}
+
 EVENT_TYPE inputAndReturnEventType(void)
 {
     // lazy way to print a menu for event type enum
@@ -301,8 +370,8 @@ EVENT_TYPE inputAndReturnEventType(void)
         printf("\t%d.  %s\n", i, getEventTypeString(i));
 
     int input = 0;
-    while (!getIntegerInput(&input) || input < 1 || input > OTHER)
-        puts("Please try again.");
+    while (!getIntegerInput(&input) || input < APPOINTMENT || input > OTHER)
+        puts("Invalid input.  Please try again.");
 
     return input;
 }
@@ -314,53 +383,119 @@ RECURRENCE inputAndReturnRecurrence(void)
         printf("\t%d.  %s\n", i + 1, getRecurrenceString(i));
 
     int input = 0;
-    while (!getIntegerInput(&input) || input < 1 || input > YEARLY_BY_WEEKDAY)
-        puts("Please try again.");
+    while (!getIntegerInput(&input) || input < (NONE + 1) || input > YEARLY_BY_WEEKDAY)
+        puts("Invalid input.  Please try again.");
     
     return input - 1;
 }
 
-void inputDateAndTime(TIME* time)
+bool inputTime(TIME* eventTime)
 {
+    puts("Please input the time (in 24-hour time, with the format HH:MM) of the event.");
+    char timeString[SHORT_TIME_LEN] = { 0 };
+    while (!getStringInput(timeString, SHORT_TIME_LEN))
+        puts("Invalid input.  Please try again.");
 
+    if (!tokenizeToInteger(timeString, "/", &eventTime->tm_hour))
+        return false;
+    if (!tokenizeToInteger(timeString, "\0", &eventTime->tm_min))
+        return false;
+
+    if (!isValidTime(eventTime))
+    {
+        eventTime->tm_hour = 0;
+        eventTime->tm_min = 0;
+        return false;
+    }
+    return true;
 }
 
-void inputDate(TIME* date)
+bool inputDate(TIME* date)
 {
-    // or input 0 for current date/time
-    char day[MAX_DATE_LEN] = { 0 };
+    puts("Please input a date (in the format YYYY/MM/DD), or enter 'C' for current date.");
+    char dateString[SHORT_DATE_LEN] = { 0 };
+    while (!getStringInput(dateString, SHORT_DATE_LEN))
+        puts("Invalid input.  Please try again.");
 
-    puts("Please input a date (YYYY/MM/DD), or enter 0 for current date.");
+    if (dateString[0] == 'c' || dateString[0] == 'C')
+    {
+        currentDate(date);
+        return true;
+    }
+
+    if (!tokenizeToInteger(dateString, "/", &date->tm_year))
+        return false;
+    if (!tokenizeToInteger(dateString, "/", &date->tm_mon))
+        return false;
+    if (!tokenizeToInteger(dateString, "\0", &date->tm_mday))
+        return false;
+
+    if (!isValidDate(date))
+    {
+        date->tm_year = 0;
+        date->tm_mon = 0;
+        date->tm_mday = 0;
+        return false;
+    }
+    return true;
 }
 
-void inputWeek(TIME* week)
-{
-    // hmmm
-}
-
-void inputMonth(TIME* month)
+bool inputWeek(TIME* week)
 {
 
-}
 
-void inputYear(TIME* year)
-{
-
-}
-
-bool exitWithoutSave(void)
-{
-    puts("\nWould you like to exit without saving?  (y/n)");
-    char ch = returnSingleChar();
-    if (ch == 'y' || ch == 'Y')
+    if (isValidDate(week))
         return true;
     else
         return false;
 }
 
+bool inputMonth(TIME* month)
+{
+    puts("First, choose the year you want to view events for.");
+    while (!inputYear(month))
+        puts("Invalid year.  Please try again.");
+
+    char monthName[MAX_MONTH_NAME] = { 0 };
+    puts("Now enter the month name.");
+    while (!getStringInput(monthName, MAX_MONTH_NAME))
+        puts("Invalid input.  Please try again.");
+
+    for (int i = JAN; i <= DEC; i++)
+    {
+        if (strncmp(monthName, getMonthName(i), MAX_MONTH_NAME) == 0)
+        {
+            month->tm_mon = i;
+            break;
+        }
+    }
+
+    if (!isValidDate(month))
+    {
+        month->tm_mon = 0;
+        return false;
+    }
+    return true;
+}
+
+bool inputYear(TIME* year)
+{
+    puts("Please input a year.");
+    while (!getIntegerInput(&year->tm_year))
+        puts("Invalid input.  Please try again.");
+
+    if (!isValidDate(year))
+    {
+        year->tm_year = 0;
+        return false;
+    }
+    return true;
+}
+
 void horizontalLine(void)
 {
     puts("________________________________________________________________________________");
+    
     // box-drawing chars don't look very good on non-unicode terminals :(
     //puts("\n────────────────────────────────────────────────────────────────────────────────");
 }

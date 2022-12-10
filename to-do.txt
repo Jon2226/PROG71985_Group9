@@ -1,9 +1,20 @@
-To-do
-	-- display events between two arbitrary dates
+To-do (unsorted)
+
+	-- properly create/implement recurring events
+	-- improve formatting of remaining time display
+	-- add function to call strtok and convert input to int, for code readability/reusability
+	-- replace use of \t with something more portable (since tab widths will differ by what runs the program)
+	-- move 'menu' functions to separate component from 'interface' so it's less cluttered
+	-- enum for menu options, or use letters
 	-- add escape characters to for user to back out of ALL input menus
-	-- add event end time, and/or duration
-	-- check for schedule conflicts when adding an event, and ask user to confirm or change the time
+	-- implement end time for events, and/or duration
+		-- check for schedule conflicts when adding an event, and ask user to confirm or change the time
 	-- test/refactor for DST and different timezones compatability
+	-- possibly refactor the whole project to rename EVENT, since it turns out Microsoft very annoyingly defines 'event' as a keyword in the .NET framework (which leads to non-standard syntax highlighting in Visual Studio, and potentially a lot of confusion)
+		-- for now, variables have been renamed 
+	-- display for week in tabular format (Mon Tue Wed Thu Fri Sat Sun) with events listed below each day
+
+	-- make an enumerated array of function pointers for different search methods used in the search/range menu (i.e. to replace the switch statements, to make those menu functions leaner and more readable)
 
 	-- revise search algorithm to continue to the end of the list every time and collect all results at once (by storing them in a second list): this will be much more efficient than re-searching the entire list until we reach the end
 
@@ -12,10 +23,8 @@ To-do
 		-- write a containsWord() function using strtok to search for event with just one word of the description
 		-- more complex algorithms?
 
-	-- make an enumerated array of function pointers for different search methods in the search/range menu switch statements... partly to make those functions leaner and more readable, but mostly because function pointers are cool
-
 	-- allow user to define custom event type names
 	-- look at iCal format and consider feasability of import/export
 
 -- learn ncurses to make the I/O way cooler
--- use a GUI library to... just kidding, CLI > GUI
+
